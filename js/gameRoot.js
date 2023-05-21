@@ -251,6 +251,12 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         return 'empty'; // Otherwise, "empty" (neither move nor setup)
     };
 
+    root.getCorrectColor = function() {
+        if (this.correct)
+            return 'green';
+        return 'red';
+    };
+
     // Checks if this node can be modified by a 'type' action
     root.isMutable = function(type) {
         // Can only add a move to an empty node with no children

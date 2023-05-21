@@ -94,11 +94,11 @@ besogo.svgStone = function(x, y, color) {
 };
 
 // Makes a circle at (x, y)
-besogo.svgCircle = function(x, y, color) {
+besogo.svgCircle = function(x, y, color, radius = 27) {
     return besogo.svgEl("circle", {
         cx: x,
         cy: y,
-        r: 27,
+        r: radius,
         stroke: color,
         "stroke-width": 8,
         fill: "none"

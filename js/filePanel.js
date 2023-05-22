@@ -18,8 +18,11 @@ besogo.makeFilePanel = function(container, editor) {
     element.type = 'button';
     element.value = 'Open';
     element.title = 'Import SGF';
-    element.onclick = function() { // Bind click to the hidden file chooser
-        fileChooser.click();
+    element.onclick = function()  // Bind click to the hidden file chooser
+    {
+      if (editor.wasEdited() && !confirm("Changes were made, throw it away?"))
+        return;
+      fileChooser.click();
     };
     container.appendChild(element);
 
@@ -57,14 +60,15 @@ besogo.makeFilePanel = function(container, editor) {
         button.value = size + "x" + size;
         if (size === '?') { // Make button for custom sized board
             button.title = "New custom size board";
-            button.onclick = function() {
-                var input = prompt("Enter custom size for new board" + "\n" + WARNING, "19:19"),
-                    size;
-                if (input) { // Canceled or empty string does nothing
-                    size = besogo.parseSize(input);
-                    editor.loadRoot(besogo.makeGameRoot(size.x, size.y));
-                    editor.setGameInfo({});
-                }
+            button.onclick = function()
+            {
+              var input = prompt("Enter custom size for new board" + "\n" + (editor.wasEdited() ? WARNING : ''), "19:19");
+              if (input)  // Canceled or empty string does nothing
+              {
+                var size = besogo.parseSize(input);
+                editor.loadRoot(besogo.makeGameRoot(size.x, size.y));
+                editor.setGameInfo({});
+              }
             };
         } else { // Make button for fixed size board
             button.title = "New " + size + "x" + size + " board";
@@ -88,27 +92,31 @@ besogo.makeFilePanel = function(container, editor) {
     }
 
     // Reads, parses and loads an SGF file
-    function readFile(evt) {
-        var file = evt.target.files[0], // Selected file
-            reader = new FileReader(),
-            newChooser = makeFileChooser(); // Create new file input to reset selection
+    function readFile(evt)
+    {
+      var file = evt.target.files[0], // Selected file
+          reader = new FileReader();
 
-        container.replaceChild(newChooser, fileChooser); // Replace with the reset selector
-        fileChooser = newChooser;
+      var newChooser = makeFileChooser(); // Create new file input to reset selection
 
-        reader.onload = function(e){ // Parse and load game tree
-            var sgf;
-            try {
-                sgf = besogo.parseSgf(e.target.result);
-            } catch (error) {
-                alert('SGF parse error at ' + error.at + ':\n' + error.message);
-                return;
-            }
-            besogo.loadSgf(sgf, editor);
-        };
-        if (confirm("Load '" + file.name + "'?\n" + WARNING)) {
-            reader.readAsText(file); // Initiate file read
+      container.replaceChild(newChooser, fileChooser); // Replace with the reset selector
+      fileChooser = newChooser;
+
+      reader.onload = function(e) // Parse and load game tree
+      {
+        var sgf;
+        try
+        {
+          sgf = besogo.parseSgf(e.target.result);
         }
+        catch (error)
+        {
+          alert('SGF parse error at ' + error.at + ':\n' + error.message);
+          return;
+        }
+        besogo.loadSgf(sgf, editor);
+      };
+      reader.readAsText(file); // Initiate file read
     }
 
     // Composes SGF file and initializes download

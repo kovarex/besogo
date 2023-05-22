@@ -33,7 +33,8 @@ besogo.makeEditor = function(sizeX, sizeY) {
         coord = 'none', // Selected coordinate system
 
         // Variant style: even/odd - children/siblings, <2 - show auto markup for variants
-        variantStyle = 0; // 0-3, 0 is default
+        variantStyle = 0, // 0-3, 0 is default
+        edited = false;
 
     return {
         addListener: addListener,
@@ -62,7 +63,8 @@ besogo.makeEditor = function(sizeX, sizeY) {
         promote: promote,
         demote: demote,
         getRoot: getRoot,
-        loadRoot: loadRoot // Loads new game state
+        loadRoot: loadRoot, // Loads new game state
+        wasEdited: wasEdited
     };
 
     // Returns the active tool
@@ -193,10 +195,12 @@ besogo.makeEditor = function(sizeX, sizeY) {
         return root;
     }
 
-    function loadRoot(load) {
-        root = load;
-        current = load;
-        notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
+    function loadRoot(load)
+    {
+      root = load;
+      current = load;
+      notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
+      edited = false;
     }
 
     // Navigates forward num nodes (to the end if num === -1)
@@ -332,7 +336,7 @@ besogo.makeEditor = function(sizeX, sizeY) {
                 break;
             case 'auto':
                 if (!navigate(i, j, shiftKey) && !shiftKey) { // Try to navigate to (i, j)
-                    playMove(i, j, 0, ctrlKey); // Play auto-color move if navigate fails
+                  playMove(i, j, 0, ctrlKey); // Play auto-color move if navigate fails
                 }
                 break;
             case 'playB':
@@ -384,44 +388,43 @@ besogo.makeEditor = function(sizeX, sizeY) {
 
     // Navigates to child with move at (x, y), searching tree if shift key pressed
     // Returns true is successful, false if not
-    function navigate(x, y, shiftKey) {
-        var i, move,
-            children = current.children;
+    function navigate(x, y, shiftKey)
+    {
+      var children = current.children;
 
-        // Look for move across children
-        for (i = 0; i < children.length; i++)
+      // Look for move across children
+      for (let i = 0; i < children.length; i++)
+      {
+        let move = children[i].move;
+        if (shiftKey)  // Search for move in branch
         {
-          move = children[i].move;
-          if (shiftKey)  // Search for move in branch
+          if (jumpToMove(x, y, children[i]))
+            return true;
+        }
+        else if (move && move.x === x && move.y === y)
+        {
+          current = children[i]; // Navigate to child if found
+          notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
+          return true;
+        }
+      }
+
+      if (current.virtualChildren)
+        for (let i = 0; i < current.virtualChildren.length; i++)
+        {
+          var child = current.virtualChildren[i];
+          let move = child.move;
+          if (move.x === x && move.y === y)
           {
-            if (jumpToMove(x, y, children[i]))
-              return true;
-          }
-          else if (move && move.x === x && move.y === y)
-          {
-            current = children[i]; // Navigate to child if found
+            current = child.target;
             notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
             return true;
           }
         }
-        
-        if (current.virtualChildren)
-          for (i = 0; i < current.virtualChildren.length; i++)
-          {
-            var child = current.virtualChildren[i];
-            move = child.move;
-            if (move.x === x && move.y === y)
-            {
-              current = child.target;
-              notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
-              return true;
-            }
-          }
 
-        if (shiftKey && jumpToMove(x, y, root, current)) {
-            return true;
-        }
-        return false;
+      if (shiftKey && jumpToMove(x, y, root, current))
+        return true;
+      return false;
     }
 
     // Recursive function for jumping to move with depth-first search
@@ -453,46 +456,51 @@ besogo.makeEditor = function(sizeX, sizeY) {
     function playMove(i, j, color, allowAll) {
         var next;
         // Check if current node is immutable or root
-        if ( !current.isMutable('move') || !current.parent ) {
-            next = current.makeChild(); // Create a new child node
-            if (next.playMove(i, j, color, allowAll)) { // Play in new node
-                // Keep (add to game state tree) only if move succeeds
-                current.addChild(next);
-                current = next;
-                // Notify tree change, navigation, and stone change
-                notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
-            }
+        if (!current.isMutable('move') || !current.parent)
+        {
+          next = current.makeChild(); // Create a new child node
+          if (next.playMove(i, j, color, allowAll)) // Play in new node
+          {
+            // Keep (add to game state tree) only if move succeeds
+            current.addChild(next);
+            current = next;
+            // Notify tree change, navigation, and stone change
+            notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
+            edited = true;
+          }
         // Current node is mutable and not root
-        } else if(current.playMove(i, j, color, allowAll)) { // Play in current
+        } else if(current.playMove(i, j, color, allowAll))
+        { // Play in current
             // Only need to update if move succeeds
-            notifyListeners({ stoneChange: true }); // Stones changed
+          notifyListeners({ stoneChange: true }); // Stones changed
+          edited = true;
         }
     }
 
     // Places a setup stone at the given color and location
-    function placeSetup(i, j, color) {
-        var next;
-        if (color === current.getStone(i, j)) { // Compare setup to current
-            if (color !== 0) {
-                color = 0; // Same as current indicates removal desired
-            } else { // Color and current are both empty
-                return; // No change if attempting to set empty to empty
-            }
-        }
+    function placeSetup(i, j, color)
+    {
+        if (color === current.getStone(i, j)) // Compare setup to current
+          if (color !== 0)
+            color = 0; // Same as current indicates removal desired
+          else // Color and current are both empty
+            return; // No change if attempting to set empty to empty
         // Check if current node can accept setup stones
-        if (!current.isMutable('setup')) {
-            next = current.makeChild(); // Create a new child node
-            if (next.placeSetup(i, j, color)) { // Place setup stone in new node
-                // Keep (add to game state tree) only if change occurs
-                current.addChild(next);
-                current = next;
-                // Notify tree change, navigation, and stone change
-                notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
-            }
-        } else if(current.placeSetup(i, j, color)) { // Try setup in current
-            // Only need to update if change occurs
-            notifyListeners({ stoneChange: true }); // Stones changed
+        if (!current.isMutable('setup'))
+        {
+          var next = current.makeChild(); // Create a new child node
+          if (next.placeSetup(i, j, color)) // Place setup stone in new node
+          {
+            // Keep (add to game state tree) only if change occurs
+            current.addChild(next);
+            current = next;
+            // Notify tree change, navigation, and stone change
+            notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
+          }
         }
+        else if(current.placeSetup(i, j, color)) // Try setup in current
+            // Only need to update if change occurs
+          notifyListeners({ stoneChange: true }); // Stones changed
     }
 
     // Sets the markup at the given location and place
@@ -547,13 +555,18 @@ besogo.makeEditor = function(sizeX, sizeY) {
     //    navChange: current switched to different node
     //    stoneChange: stones modified in current node
     //    markupChange: markup modified in current node
-    function notifyListeners(msg, keepHistory) {
-        var i;
-        if (!keepHistory && msg.navChange) {
-            navHistory = []; // Clear navigation history
-        }
-        for (i = 0; i < listeners.length; i++) {
-            listeners[i](msg);
-        }
+    function notifyListeners(msg, keepHistory)
+    {
+      if (msg.treeChange || msg.stoneChange)
+        edited = true;
+      if (!keepHistory && msg.navChange)
+        navHistory = []; // Clear navigation history
+      for (let i = 0; i < listeners.length; i++)
+        listeners[i](msg);
+    }
+
+    function wasEdited()
+    {
+      return edited;
     }
 };

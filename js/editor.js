@@ -287,14 +287,13 @@ besogo.makeEditor = function(sizeX, sizeY) {
       if (tool === 'navOnly')
         return; // Tree editing disabled in navOnly mode
       if (parent)
-        if (confirm("Delete this branch?") === true)
-        {
-          parent.removeChild(current);
-          current = parent;
-          besogo.updateCorrectValues(current.getRoot());
-          // Notify navigation and tree edited
-          notifyListeners({ treeChange: true, navChange: true });
-        }
+      {
+        parent.removeChild(current);
+        current = parent;
+        besogo.updateCorrectValues(current.getRoot());
+        // Notify navigation and tree edited
+        notifyListeners({ treeChange: true, navChange: true });
+      }
     }
 
     // Raises current variation to a higher precedence

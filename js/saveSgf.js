@@ -24,10 +24,8 @@ besogo.composeSgf = function(editor, expand = false) {
           string += '\n(' + composeNode(children[i], expand) + ')';
         if (expand)
           for (i = 0; i < tree.virtualChildren.length; i++)
-          {
             if (tree.correct || !tree.virtualChildren[i].target.correct)
               string += '\n(' + composeNode(tree.virtualChildren[i].target, expand, tree.virtualChildren[i].move) + ')';
-          }
       }
       return string;
     }

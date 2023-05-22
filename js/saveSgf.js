@@ -101,7 +101,7 @@ besogo.composeSgf = function(editor, expand = false) {
         }
         string += composePointLists(props);
 
-        if (node.comment) // Compose comment property
+        if (node.comment || node.correctSource) // Compose comment property
         {
           string += (string ? '\n' : ''); // Add line break if other properties exist
           string += 'C[' + escapeText((node.correctSource ? '+' : '') + node.comment) + ']';

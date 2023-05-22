@@ -26,104 +26,113 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     // Plays a move, returns true if successful
     // Set allow to truthy to allow overwrite, suicide and ko
-    root.playMove = function(x, y, color = false, allow = false) {
-        var captures = 0, // Number of captures made by this move
-            overwrite = false, // Flags whether move overwrites a stone
-            prevMove, // Previous move for ko check
-            testBoard, // Copy of board state to test captures, ko, and suicide
-            pending, // Pending capture locations
-            i; // Scratch iteration variable
+    root.playMove = function(x, y, color = false, allow = false)
+    {
+      var captures = 0, // Number of captures made by this move
+          overwrite = false, // Flags whether move overwrites a stone
+          prevMove; // Previous move for ko check
 
-        if (!this.isMutable('move')) {
-            return false; // Move fails if node is immutable
-        }
+      if (!this.isMutable('move'))
+        return false; // Move fails if node is immutable
 
-        if (!color) { // Falsy color indicates auto-color
-            color = this.nextMove();
-        }
+      if (!color) // Falsy color indicates auto-color
+        color = this.nextMove(); 
 
-        if (x < 1 || y < 1 || x > sizeX || y > sizeY) {
-            this.move = { // Register as pass move if out of bounds
-                x: 0, y: 0, // Log pass as position (0, 0)
-                color: color,
-                captures: 0, // Pass never captures
-                overwrite: false // Pass is never an overwrite
-            };
-            this.lastMove = color; // Store color of last move
-            this.moveNumber++; // Increment move number
-            return true; // Pass move successful
-        }
-
-        if (this.getStone(x, y))  // Check for overwrite
+      if (x < 1 || y < 1 || x > sizeX || y > sizeY)
+      {
+        // Register as pass move if out of bounds
+        this.move =
         {
-          if (!allow)
-            return false; // Reject overwrite move if not allowed
-          overwrite = true; // Otherwise, flag overwrite and proceed
-        }
-
-        testBoard = Object.create(this); // Copy board state (no need to initialize)
-        pending = []; // Initialize pending capture array
-
-        testBoard.setStone(x, y, color); // Place the move stone
-
-        // Check for captures of surrounding chains
-        captureStones(testBoard, x - 1, y, color, pending);
-        captureStones(testBoard, x + 1, y, color, pending);
-        captureStones(testBoard, x, y - 1, color, pending);
-        captureStones(testBoard, x, y + 1, color, pending);
-
-        captures = pending.length; // Capture count
-
-        prevMove = this.parent ? this.parent.move : null; // Previous move played
-        if (!allow && prevMove && // If previous move exists, ...
-            prevMove.color === -color && // was of the opposite color, ...
-            prevMove.overwrite === false && // not an overwrite, ...
-            prevMove.captures === 1 && // captured exactly one stone, and if ...
-            captures === 1 && // this move captured exactly one stone at the location ...
-            !testBoard.getStone(prevMove.x, prevMove.y) ) { // of the previous move
-                return false; // Reject ko move if not allowed
-        }
-
-        if (captures === 0) { // Check for suicide if nothing was captured
-            captureStones(testBoard, x, y, -color, pending); // Invert color for suicide check
-            captures = -pending.length; // Count suicide as negative captures
-            if (captures < 0 && !allow) {
-                return false; // Reject suicidal move if not allowed
-            }
-        }
-
-        if (color * captures < 0) { // Capture by black or suicide by white
-            this.blackCaps += Math.abs(captures); // Tally captures for black
-        } else { // Capture by white or suicide by black
-            this.whiteCaps += Math.abs(captures); // Tally captures for white
-        }
-
-        this.setStone(x, y, color); // Place the stone
-        for (i = 0; i < pending.length; i++) { // Remove the captures
-            this.setStone(pending[i].x, pending[i].y, EMPTY);
-        }
-
-        this.move = { // Log the move
-            x: x, y: y,
-            color: color,
-            captures: captures,
-            overwrite: overwrite
+          x: 0, y: 0, // Log pass as position (0, 0)
+          color: color,
+          captures: 0, // Pass never captures
+          overwrite: false // Pass is never an overwrite
         };
         this.lastMove = color; // Store color of last move
         this.moveNumber++; // Increment move number
-        return true;
+        return true; // Pass move successful
+      }
+
+      var previousColor = this.getStone(x, y);
+
+      if (previousColor)  // Check for overwrite
+      {
+        if (!allow)
+          return false; // Reject overwrite move if not allowed
+        overwrite = true; // Otherwise, flag overwrite and proceed
+      }
+
+      var pending = []; // Initialize pending capture array
+      var suicidePending = [];
+
+      this.setStone(x, y, color); // Place the move stone
+
+      // Check for captures of surrounding chains
+      captureStones(this, x - 1, y, color, pending);
+      captureStones(this, x + 1, y, color, pending);
+      captureStones(this, x, y - 1, color, pending);
+      captureStones(this, x, y + 1, color, pending);
+
+      captures = pending.length; // Capture count
+
+      prevMove = this.parent ? this.parent.move : null; // Previous move played
+      if (!allow && prevMove && // If previous move exists, ...
+          prevMove.color === -color && // was of the opposite color, ...
+          prevMove.overwrite === false && // not an overwrite, ...
+          prevMove.captures === 1 && // captured exactly one stone, and if ...
+          captures === 1 && // this move captured exactly one stone at the location ...
+          !this.getStone(prevMove.x, prevMove.y)) //of the previous move
+      {
+        this.setStone(x, y, previousColor);
+        for (let i = 0; i < pending.length; ++i)
+          this.setStone(pending[i].x, pending[i].y, -color);
+        return false; // Reject ko move if not allowed
+      }
+
+      if (captures === 0)  // Check for suicide if nothing was captured
+      {
+        captureStones(this, x, y, -color, suicidePending); // Invert color for suicide check
+        captures = -suicidePending.length; // Count suicide as negative captures
+        if (captures < 0 && !allow)
+        {
+          this.setStone(x, y, previousColor);
+          for (let i = 0; i < pending.length; ++i)
+            this.setStone(pending[i].x, pending[i].y, -color);
+          for (let i = 0; i < suicidePending.length; ++i)
+            this.setStone(suicidePending[i].x, suicidePending[i].y, color);
+          return false; // Reject suicidal move if not allowed
+        }
+      }
+
+      if (color * captures < 0) // Capture by black or suicide by white
+        this.blackCaps += Math.abs(captures); // Tally captures for black
+      else // Capture by white or suicide by black
+        this.whiteCaps += Math.abs(captures); // Tally captures for white
+
+      // Log the move
+      this.move =
+      {
+        x: x, y: y,
+        color: color,
+        captures: captures,
+        overwrite: overwrite
+      };
+      this.lastMove = color; // Store color of last move
+      this.moveNumber++; // Increment move number
+      return true;
     }; // END func root.playMove
 
     // Check for and perform capture of opposite color chain at (x, y)
-    function captureStones(board, x, y, color, captures) {
-        var pending = [],
-            i; // Scratch iteration variable
+    function captureStones(board, x, y, color, captures)
+    {
+      var pending = [];
 
-        if ( !recursiveCapture(board, x, y, color, pending) ) { // Captured chain found
-            for (i = 0; i < pending.length; i++) { // Remove captured stones
-                board.setStone(pending[i].x, pending[i].y, EMPTY);
-                captures.push(pending[i]);
-            }
+      // Captured chain found
+      if (!recursiveCapture(board, x, y, color, pending))
+        for (let i = 0; i < pending.length; i++)  // Remove captured stones
+        {
+          board.setStone(pending[i].x, pending[i].y, EMPTY);
+          captures.push(pending[i]);
         }
     }
 

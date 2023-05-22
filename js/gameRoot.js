@@ -13,6 +13,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     // Initializes non-inherited attributes
     function initNode(node, parent) {
         node.parent = parent;
+        node.board = parent ? Object.create(parent.board) : [];
         node.children = [];
 
         node.move = null;
@@ -62,7 +63,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         testBoard = Object.create(this); // Copy board state (no need to initialize)
         pending = []; // Initialize pending capture array
 
-        setStone(testBoard, x, y, color); // Place the move stone
+        testBoard.setStone(x, y, color); // Place the move stone
 
         // Check for captures of surrounding chains
         captureStones(testBoard, x - 1, y, color, pending);
@@ -96,9 +97,9 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
             this.whiteCaps += Math.abs(captures); // Tally captures for white
         }
 
-        setStone(this, x, y, color); // Place the stone
+        this.setStone(x, y, color); // Place the stone
         for (i = 0; i < pending.length; i++) { // Remove the captures
-            setStone(this, pending[i].x, pending[i].y, EMPTY);
+            this.setStone(pending[i].x, pending[i].y, EMPTY);
         }
 
         this.move = { // Log the move
@@ -119,7 +120,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
         if ( !recursiveCapture(board, x, y, color, pending) ) { // Captured chain found
             for (i = 0; i < pending.length; i++) { // Remove captured stones
-                setStone(board, pending[i].x, pending[i].y, EMPTY);
+                board.setStone(pending[i].x, pending[i].y, EMPTY);
                 captures.push(pending[i]);
             }
         }
@@ -186,7 +187,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
             return false;
         }
 
-        setStone(this, x, y, color); // Place the setup stone
+        this.setStone(x, y, color); // Place the setup stone
         this.setupStones[ fromXY(x, y) ] = color - prevColor; // Record the necessary change
         return true;
     };
@@ -199,19 +200,12 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         if (this.getMarkup(x, y) === mark) { // Quit early if no change to make
             return false;
         }
-        this.markup[ fromXY(x, y) ] = mark;
+        this.markup[fromXY(x, y)] = mark;
         return true;
     };
 
-    // Returns the stone status of the given position
-    root.getStone = function(x, y) {
-        return this['board' + x + '-' + y] || EMPTY;
-    };
-
-    // Directly sets the stone state for the given game node
-    function setStone(node, x, y, color) {
-        node['board' + x + '-' + y] = color;
-    }
+    root.getStone = function(x, y) { return this.board[x + '-' + y] || EMPTY; };
+    root.setStone = function(x, y, color) { this.board[x + '-' + y] = color; }
 
     // Gets the setup stone placed at (x, y), returns false if none
     root.getSetup = function(x, y) {
@@ -231,7 +225,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     // Gets the markup at (x, y)
     root.getMarkup = function(x, y) {
-        return this.markup[ fromXY(x, y) ] || EMPTY;
+        return this.markup[fromXY(x, y)] || EMPTY;
     };
 
     // Determines the type of this node

@@ -295,36 +295,41 @@ besogo.makeBoardDisplay = function(container, editor) {
     }
 
     // Redraws the stones
-    function redrawStones(current) {
+    function redrawStones(current)
+    {
         var group = besogo.svgEl("g"), // New stone layer group
             shadowGroup, // Group for shadow layer
             i, j, x, y, color; // Scratch iteration variables
 
-        if (editor.SHADOWS) { // Add group for shawdows
-            shadowGroup = besogo.svgShadowGroup();
-            group.appendChild(shadowGroup);
+        // Add group for shawdows
+        if (editor.SHADOWS)
+        {
+          shadowGroup = besogo.svgShadowGroup();
+          group.appendChild(shadowGroup);
         }
 
-        for (i = 1; i <= sizeX; i++) {
-            for (j = 1; j <= sizeY; j++) {
-                color = current.getStone(i, j);
-                if (color) {
-                    x = svgPos(i);
-                    y = svgPos(j);
+        for (i = 1; i <= sizeX; i++)
+          for (j = 1; j <= sizeY; j++)
+          {
+            color = current.getStone(i, j);
+            if (color)
+            {
+              x = svgPos(i);
+              y = svgPos(j);
 
-                    if (editor.REAL_STONES) { // Realistic stone
-                        group.appendChild(besogo.realStone(x, y, color, randIndex[fromXY(i, j)]));
-                    } else { // SVG stone
-                        group.appendChild(besogo.svgStone(x, y, color));
-                    }
+              if (editor.REAL_STONES) // Realistic stone
+                group.appendChild(besogo.realStone(x, y, color, randIndex[fromXY(i, j)]));
+              else // SVG stone
+                group.appendChild(besogo.svgStone(x, y, color));
 
-                    if (editor.SHADOWS) { // Draw shadows
-                        shadowGroup.appendChild(besogo.svgShadow(x - 2, y - 4));
-                        shadowGroup.appendChild(besogo.svgShadow(x + 2, y + 4));
-                    }
-                }
+              // Draw shadows
+              if (editor.SHADOWS)
+              {
+                shadowGroup.appendChild(besogo.svgShadow(x - 2, y - 4));
+                shadowGroup.appendChild(besogo.svgShadow(x + 2, y + 4));
+              }
             }
-        }
+          }
 
         svg.replaceChild(group, stoneGroup); // Replace the stone group
         stoneGroup = group;
@@ -400,9 +405,6 @@ besogo.makeBoardDisplay = function(container, editor) {
             }
         }
 
-        // Mark variants that have not already been marked above
-        markRemainingVariants(variants, current, group);
-
         svg.replaceChild(group, markupGroup); // Replace the markup group
         markupGroup = group;
     } // END function redrawMarkup
@@ -413,7 +415,6 @@ besogo.makeBoardDisplay = function(container, editor) {
       for (let i = 0; i < current.children.length; ++i)
       {
         var child = current.children[i];
-        //window.alert(i + " Making circle at " + child.move.x + ", " + child.move.y + " with color: " + child.getCorrectColor());
         var element = besogo.svgFilledCircle(svgPos(child.move.x), svgPos(child.move.y), child.getCorrectColor(), 15);
         group.appendChild(element);
       }
@@ -453,36 +454,6 @@ besogo.makeBoardDisplay = function(container, editor) {
         }
         return false;
     }
-
-    // Marks variants that have not already been marked
-    function markRemainingVariants(variants, current, group) {
-        var element,
-            move, // Variant move
-            label, // Variant label
-            stone, // Stone state
-            i, x, y; // Scratch iteration variables
-
-        for (i = 0; i < variants.length; i++) {
-            if (variants[i] !== current) { // Skip current (within siblings)
-                move = variants[i].move;
-                // Check if move, not a pass, and no mark yet
-                if (move && move.x !== 0 && !markupLayer[ fromXY(move.x, move.y) ]) {
-                    stone = current.getStone(move.x, move.y);
-                    x = svgPos(move.x); // Get SVG positions
-                    y = svgPos(move.y);
-                    if (!stone) { // If placing label on empty spot
-                        element = makeBacker(x, y);
-                        group.appendChild(element);
-                    }
-                    // Label variants with letters A-Z cyclically
-                    label = String.fromCharCode('A'.charCodeAt(0) + (i % 26));
-                    element = besogo.svgLabel(x, y, besogo.LRED, label);
-                    group.appendChild(element);
-                    markupLayer[ fromXY(move.x, move.y) ] = element;
-                }
-            }
-        }
-    } // END function markRemainingVariants
 
     // Redraws the hover layer
     function redrawHover(current) {

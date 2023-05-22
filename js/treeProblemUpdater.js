@@ -3,9 +3,9 @@ besogo.updateTreeAsProblem = function(root)
   root.hashTable = []
   root.prunnedMoveCount = 0;
   besogo.updateTreeAsProblemInternal(root, root);
-  besogo.addVirtualChildren(root, root);
   window.alert("Pruned move count: " + root.prunnedMoveCount +
                " (out of original " + (root.prunnedMoveCount + root.treeSize()) + ")");
+  besogo.addVirtualChildren(root, root);
 };
 
 besogo.addVirtualChildren = function(root, node)
@@ -26,6 +26,7 @@ besogo.addVirtualChildren = function(root, node)
             node.virtualChildren.push(sameNode);
         }
       }
+
   for (let i = 0; i < node.children.length; ++i)
     besogo.addVirtualChildren(root, node.children[i]);
 }

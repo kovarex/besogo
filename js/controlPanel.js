@@ -4,8 +4,7 @@ besogo.makeControlPanel = function(container, editor) {
         rightElements = [], // SVG elements for next node buttons
         siblingElements = [], // SVG elements for sibling buttons
         variantStyleButton, // Button for changing variant style
-        childVariantElement, // SVG element for child style variants
-        siblingVariantElement; // SVG element for sibling style variants
+        childVariantElement; // SVG element for child style variants
 
     drawNavButtons();
     drawStyleButtons();
@@ -14,7 +13,8 @@ besogo.makeControlPanel = function(container, editor) {
     update({ navChange: true, variantStyle: editor.getVariantStyle() }); // Initialize
 
     // Callback for variant style and nav state changes
-    function update(msg) {
+    function update(msg)
+    {
         var current;
 
         if (msg.variantStyle !== undefined) {
@@ -44,11 +44,9 @@ besogo.makeControlPanel = function(container, editor) {
         function updateStyleButtons(style) { // Updates the variant style buttons
             if (style % 2) { // Sibling style variants
                 childVariantElement.setAttribute('fill', 'black');
-                siblingVariantElement.setAttribute('fill', besogo.BLUE);
                 variantStyleButton.title = 'Variants: child/[sibling]';
             } else { // Child style variants
                 childVariantElement.setAttribute('fill', besogo.BLUE);
-                siblingVariantElement.setAttribute('fill', besogo.RED);
                 variantStyleButton.title = 'Variants: [child]/sibling';
             }
         }
@@ -145,22 +143,6 @@ besogo.makeControlPanel = function(container, editor) {
             r: 20,
             stroke: 'none'
         });
-        svg.appendChild(childVariantElement);
-        siblingVariantElement = besogo.svgEl('circle', {
-            cx: 75,
-            cy: 25,
-            r: 20,
-            stroke: 'none'});
-        svg.appendChild(siblingVariantElement);
-        element = besogo.svgEl('circle', {
-            cx: 75,
-            cy: 75,
-            r: 20,
-            fill: besogo.RED,
-            stroke: 'none'
-        });
-        svg.appendChild(element);
-
         coordStyleButton = document.createElement('button');
         coordStyleButton.onclick = function() {
             editor.toggleCoordStyle(); // Toggles coordinate style

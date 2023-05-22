@@ -5,35 +5,61 @@ besogo.updateTreeAsProblem = function(root)
   besogo.pruneTree(root, root);
   window.alert("Pruned move count: " + root.prunnedMoveCount +
                " (out of original " + (root.prunnedMoveCount + root.treeSize()) + ")");
+  root.relevantMoves = [];
+  besogo.addRelevantMoves(root, root)
+  var test = 0;
+  for (let i = 0; i < root.relevantMoves.length; ++i)
+    if (root.relevantMoves[i])
+      ++test;
   besogo.addVirtualChildren(root, root);
   besogo.clearCorrectValues(root);
   besogo.updateCorrectValues(root);
 };
 
+besogo.addRelevantMoves = function(root, node)
+{
+  for (let i = 0; i < node.setupStones.length; ++i)
+    if (node.setupStones[i])
+      root.relevantMoves[i] = true;
+  if (node.move)
+  {
+    var move = [];
+    move.x = node.move.x;
+    move.y = node.move.y;
+    root.relevantMoves[root.fromXY(node.move.x, node.move.y)] = true;
+  }
+  for (let i = 0; i < node.children.length; ++i)
+    besogo.addRelevantMoves(root, node.children[i]);
+}
+
 besogo.addVirtualChildren = function(root, node)
 {
   var sizeX = root.getSize().x;
   var sizeY = root.getSize().y;
-  for (let x = 1; x <= sizeX; x++)
-    for (let y = 1; y <= sizeY; y++)
-      if (!node.getStone(x, y))
-      {
-        var testChild = node.makeChild()
-        if (!testChild.playMove(x, y))
-          node.removeChild(testChild);
+  for (let i = 0; i < root.relevantMoves.length; ++i)
+  {
+    if (!root.relevantMoves[i])
+      continue;
+    var move = root.toXY(i);
+    if (!node.getStone(move.x, move.y))
+    {
+      var testChild = node.makeChild()
+      if (!testChild.playMove(move.x, move.y))
+        node.removeChild(testChild);
 
-        var sameNode = testChild.getSameNode(root);
-        if (sameNode && sameNode.parent != node)
-        {
-          var redirect = [];
-          redirect.target = sameNode;
-          redirect.move = [];
-          redirect.move.x = x;
-          redirect.move.y = y;
-          redirect.move.color = node.nextMove();
-          node.virtualChildren.push(redirect);
-        }
+      var sameNode = testChild.getSameNode(root);
+      if (sameNode && sameNode.parent != node)
+      {
+        var redirect = [];
+        redirect.target = sameNode;
+        redirect.move = [];
+        redirect.move.x = move.x;
+        redirect.move.y = move.y;
+        redirect.move.color = node.nextMove();
+        node.virtualChildren.push(redirect);
       }
+    }
+  }
 
   for (let i = 0; i < node.children.length; ++i)
     besogo.addVirtualChildren(root, node.children[i]);

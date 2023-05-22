@@ -192,7 +192,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         }
 
         this.setStone(x, y, color); // Place the setup stone
-        this.setupStones[ fromXY(x, y) ] = color - prevColor; // Record the necessary change
+        this.setupStones[this.fromXY(x, y) ] = color - prevColor; // Record the necessary change
         return true;
     };
 
@@ -204,7 +204,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         if (this.getMarkup(x, y) === mark) { // Quit early if no change to make
             return false;
         }
-        this.markup[fromXY(x, y)] = mark;
+        this.markup[this.fromXY(x, y)] = mark;
         return true;
     };
 
@@ -213,7 +213,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     // Gets the setup stone placed at (x, y), returns false if none
     root.getSetup = function(x, y) {
-        if (!this.setupStones[ fromXY(x, y) ]) { // No setup stone placed
+        if (!this.setupStones[this.fromXY(x, y)]) { // No setup stone placed
             return false;
         } else { // Determine net effect of setup stone
             switch(this.getStone(x, y)) {
@@ -229,7 +229,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     // Gets the markup at (x, y)
     root.getMarkup = function(x, y) {
-        return this.markup[fromXY(x, y)] || EMPTY;
+        return this.markup[this.fromXY(x, y)] || EMPTY;
     };
 
     // Determines the type of this node
@@ -324,8 +324,17 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     };
 
     // Convert (x, y) coordinates to linear index
-    function fromXY(x, y) {
-        return (x - 1) * sizeY + (y - 1);
+    root.fromXY = function(x, y)
+    {
+      return (x - 1) * sizeY + (y - 1);
+    }
+    
+    root.toXY = function(value)
+    {
+      var result = [];
+      result.y = value % sizeY + 1;
+      result.x = Math.floor(value/sizeY) + 1;
+      return result;
     }
 
     root.getHash = function()

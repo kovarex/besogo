@@ -331,18 +331,23 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       return this.updateHash();
     }
 
+    function hashCode(str)
+    {
+      let hash = 0;
+      for (let i = 0, len = str.length; i < len; i++)
+      {
+        let chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+      }
+      return hash;
+    }
+
     root.updateHash = function()
     {
       this.hash = 0;
-      for (let x = 1; x <= sizeX; x++)
-        for (let y = 1; y <= sizeY; y++)
-        {
-          var stone = this.getStone(x, y);
-          if (stone === WHITE)
-            this.hash += x*6547 + y*7897;
-          else if (stone == BLACK)
-            this.hash += x*5783 + y*5681;
-        }
+      for (var key in this.board)
+        this.hash += hashCode(key) * this.board[key]
       return this.hash
     }
 

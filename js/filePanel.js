@@ -28,11 +28,24 @@ besogo.makeFilePanel = function(container, editor) {
     element.type = 'button';
     element.value = 'Save';
     element.title = 'Export SGF';
-    element.onclick = function() {
-        var fileName = prompt('Save file as', 'export.sgf');
-        if (fileName) { // Canceled or empty string does nothing
-            saveFile(fileName, besogo.composeSgf(editor));
-        }
+    element.onclick = function()
+    {
+      var fileName = prompt('Save file as', 'export.sgf');
+      if (fileName) // Canceled or empty string does nothing
+          saveFile(fileName, besogo.composeSgf(editor));
+    };
+    container.appendChild(element);
+
+    // Save file button
+    element = document.createElement('input');
+    element.type = 'button';
+    element.value = 'Save expanded';
+    element.title = 'Export SGF export with all virtual variations expanded';
+    element.onclick = function()
+    {
+      var fileName = prompt('Save file as', 'export.sgf');
+      if (fileName) // Canceled or empty string does nothing
+          saveFile(fileName, besogo.composeSgf(editor, true));
     };
     container.appendChild(element);
 

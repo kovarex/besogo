@@ -12,7 +12,6 @@ besogo.updateTreeAsProblem = function(root)
 
 besogo.addVirtualChildren = function(root, node)
 {
-  node.virtualChildren = [];
   var sizeX = root.getSize().x;
   var sizeY = root.getSize().y;
   for (let x = 1; x <= sizeX; x++)
@@ -32,6 +31,7 @@ besogo.addVirtualChildren = function(root, node)
             redirect.move = [];
             redirect.move.x = x;
             redirect.move.y = y;
+            redirect.move.color = node.nextMove();
             node.virtualChildren.push(redirect);
           }
         }

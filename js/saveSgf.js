@@ -1,30 +1,35 @@
 // Convert game state tree into SGF string
-besogo.composeSgf = function(editor) {
-    'use strict';
-    return '(' + composeNode(editor.getRoot()) + ')';
+besogo.composeSgf = function(editor, expand = false) {
+    //'use strict';
+    return '(' + composeNode(editor.getRoot(), expand) + ')';
 
     // Recursively composes game node tree
-    function composeNode(tree) {
-        var string = ';', // Node starts with semi-colon
-            children = tree.children,
-            i; // Scratch iteration variable
+    function composeNode(tree, expand, moveOverride = null)
+    {
+      var string = ';', // Node starts with semi-colon
+          children = tree.children,
+          i; // Scratch iteration variable
 
-        if (!tree.parent) { // Null parent means node is root
-            // Compose root-specific properties
-            string += composeRootProps(tree);
-        }
-        string += composeNodeProps(tree); // Compose general properties
+      if (!tree.parent) // Null parent means node is root
+          // Compose root-specific properties
+        string += composeRootProps(tree);
+      string += composeNodeProps(tree, moveOverride); // Compose general properties
 
-        // Recurse composition on child nodes
-        if (children.length === 1) { // Continue sequence if only one child
-            string += '\n' + composeNode(children[0]);
-        } else if (children.length > 1) {
-            for (i = 0; i < children.length; i++) {
-                string += '\n(' + composeNode(children[i]) + ')';
-            }
-        }
-
-        return string;
+      // Recurse composition on child nodes
+      if (children.length === 1 && (!expand || tree.virtualChildren.length == 0)) // Continue sequence if only one child
+        string += '\n' + composeNode(children[0], expand);
+      else
+      {
+        for (i = 0; i < children.length; i++)
+          string += '\n(' + composeNode(children[i], expand) + ')';
+        if (expand)
+          for (i = 0; i < tree.virtualChildren.length; i++)
+          {
+            if (tree.correct || !tree.virtualChildren[i].target.correct)
+              string += '\n(' + composeNode(tree.virtualChildren[i].target, expand, tree.virtualChildren[i].move) + ')';
+          }
+      }
+      return string;
     }
 
     // Composes root specific properties
@@ -55,27 +60,29 @@ besogo.composeSgf = function(editor) {
     }
 
     // Composes other properties
-    function composeNodeProps(node) {
+    function composeNodeProps(node, moveOverride) {
         var string = '',
             props, // Scratch variable for property structures
             stone, i, j; // Scratch iteration variables
 
         // Compose either move or setup properties depending on type of node
-        if (node.getType() === 'move') { // Compose move properties
-            stone = node.move;
-            string += (stone.color === 1) ? 'W' : 'B';
-            string += '[' + coordsToLetters(stone.x, stone.y) + ']';
-        } else if (node.getType() === 'setup') { // Compose setup properties
-            props = { AB: [], AW: [], AE: [] };
-            for (i = 1; i <= node.getSize().x; i++) {
-                for (j = 1; j <= node.getSize().y; j++) {
-                    stone = node.getSetup(i, j);
-                    if (stone) { // If setup stone placed, add to structure
-                        props[ stone ].push({ x: i, y: j });
-                    }
-                }
+        if (node.getType() === 'move')  // Compose move properties
+        {
+          var move = moveOverride ? moveOverride : node.move;
+          string += (move.color === 1) ? 'W' : 'B';
+          string += '[' + coordsToLetters(move.x, move.y) + ']';
+        }
+        else if (node.getType() === 'setup') // Compose setup properties
+        {
+          props = { AB: [], AW: [], AE: [] };
+          for (i = 1; i <= node.getSize().x; i++)
+            for (j = 1; j <= node.getSize().y; j++)
+            {
+              stone = node.getSetup(i, j);
+              if (stone) // If setup stone placed, add to structure
+                props[ stone ].push({ x: i, y: j });
             }
-            string += composePointLists(props);
+          string += composePointLists(props);
         }
 
         // Compose markup properties
@@ -96,9 +103,10 @@ besogo.composeSgf = function(editor) {
         }
         string += composePointLists(props);
 
-        if (node.comment) { // Compose comment property
-            string += (string ? '\n' : ''); // Add line break if other properties exist
-            string += 'C[' + escapeText(node.comment) + ']';
+        if (node.comment) // Compose comment property
+        {
+          string += (string ? '\n' : ''); // Add line break if other properties exist
+          string += 'C[' + escapeText(node.comment) + ']';
         }
 
         return string;

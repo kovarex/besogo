@@ -15,6 +15,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         node.parent = parent;
         node.board = parent ? Object.create(parent.board) : [];
         node.children = [];
+        node.virtualChildren = [];
 
         node.move = null;
         node.setupStones = [];
@@ -342,9 +343,9 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       this.hash = 0;
       for (var key in this.board)
         this.hash += hashCode(key) * this.board[key];
-      if (this.move)
+      /*if (this.move)
         window.alert("hash updated for " + this.move.x + ", " + this.move.y + " to " + this.hash);
-      this.comment = this.hash;
+      this.comment = this.hash;*/
       return this.hash
     }
 

@@ -17,10 +17,6 @@ besogo.makeControlPanel = function(container, editor) {
     {
         var current;
 
-        if (msg.variantStyle !== undefined) {
-            updateStyleButtons(msg.variantStyle);
-        }
-
         if (msg.navChange || msg.treeChange) { // Update the navigation buttons
             current = editor.getCurrent();
             if (current.parent) { // Has parent
@@ -38,16 +34,6 @@ besogo.makeControlPanel = function(container, editor) {
                 arraySetColor(rightElements, 'black');
             } else { // No children
                 arraySetColor(rightElements, besogo.GREY);
-            }
-        }
-
-        function updateStyleButtons(style) { // Updates the variant style buttons
-            if (style % 2) { // Sibling style variants
-                childVariantElement.setAttribute('fill', 'black');
-                variantStyleButton.title = 'Variants: child/[sibling]';
-            } else { // Child style variants
-                childVariantElement.setAttribute('fill', besogo.BLUE);
-                variantStyleButton.title = 'Variants: [child]/sibling';
             }
         }
 

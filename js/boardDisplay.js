@@ -417,6 +417,13 @@ besogo.makeBoardDisplay = function(container, editor) {
         var element = besogo.svgFilledCircle(svgPos(child.move.x), svgPos(child.move.y), child.getCorrectColor(), 15);
         group.appendChild(element);
       }
+      if (current.virtualChildren)
+        for (let i = 0; i < current.virtualChildren.length; ++i)
+        {
+          var child = current.virtualChildren[i];
+          var element = besogo.svgFilledCircle(svgPos(child.move.x), svgPos(child.move.y), child.getCorrectColor(), 8);
+          group.appendChild(element);
+        }
       svg.replaceChild(group, nextMoveGroup); // Replace the markup group
       nextMoveGroup = group;
     }

@@ -24,7 +24,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     // Plays a move, returns true if successful
     // Set allow to truthy to allow overwrite, suicide and ko
-    root.playMove = function(x, y, color, allow) {
+    root.playMove = function(x, y, color = false, allow = false) {
         var captures = 0, // Number of captures made by this move
             overwrite = false, // Flags whether move overwrites a stone
             prevMove, // Previous move for ko check

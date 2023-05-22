@@ -104,7 +104,7 @@ besogo.composeSgf = function(editor, expand = false) {
         if (node.comment) // Compose comment property
         {
           string += (string ? '\n' : ''); // Add line break if other properties exist
-          string += 'C[' + escapeText(node.comment) + ']';
+          string += 'C[' + escapeText((node.correctSource ? '+' : '') + node.comment) + ']';
         }
 
         return string;

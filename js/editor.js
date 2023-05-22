@@ -63,7 +63,8 @@ besogo.makeEditor = function(sizeX, sizeY) {
         demote: demote,
         getRoot: getRoot,
         loadRoot: loadRoot, // Loads new game state
-        wasEdited: wasEdited
+        wasEdited: wasEdited,
+        notifyListeners: notifyListeners
     };
 
     // Returns the active tool
@@ -452,6 +453,7 @@ besogo.makeEditor = function(sizeX, sizeY) {
             current = next;
             // Notify tree change, navigation, and stone change
             next.registerInVirtualMoves();
+            besogo.updateCorrectValues(current.getRoot());
             notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
             edited = true;
           }
@@ -460,8 +462,8 @@ besogo.makeEditor = function(sizeX, sizeY) {
         { // Play in current
             // Only need to update if move succeeds
           current.registerInVirtualMoves();
-          notifyListeners({ stoneChange: true }); // Stones changed
-
+          besogo.updateCorrectValues(current.getRoot());
+          notifyListeners({ treeChange: true, stoneChange: true });
           edited = true;
         }
     }

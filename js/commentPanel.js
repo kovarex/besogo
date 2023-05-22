@@ -41,6 +41,8 @@ besogo.makeCommentPanel = function(container, editor)
   container.appendChild(makeInfoButton());
   container.appendChild(makeInfoEditButton());
   container.appendChild(makeCommentButton());
+  var correctButton = makeCorrectVariantButton();
+  container.appendChild(correctButton);
   container.appendChild(gameInfoTable);
   container.appendChild(gameInfoEdit);
   infoTexts.C = document.createTextNode('');
@@ -86,6 +88,7 @@ besogo.makeCommentPanel = function(container, editor)
       updateGameInfoTable(msg.gameInfo);
       updateGameInfoEdit(msg.gameInfo);
     }
+    updateCorrectButton();
   }
 
   function updateGameInfoTable(gameInfo)
@@ -225,5 +228,33 @@ besogo.makeCommentPanel = function(container, editor)
       }
     };
     return button;
+  }
+
+  function makeCorrectVariantButton()
+  {
+    var button = document.createElement('input');
+    button.type = 'button';
+    button.value = 'Incorrect';
+    button.title = 'Change incorrect state';
+
+    button.onclick = function()
+    {
+      editor.getCurrent().setCorrectSource(!editor.getCurrent().correctSource, editor);
+    };
+    return button;
+  }
+
+  function updateCorrectButton()
+  {
+    var current = editor.getCurrent();
+    if (current.children.length || current.virtualChildren.length)
+      correctButton.disabled = true;
+    else
+      correctButton.disabled = false;
+
+    if (current.correct)
+      correctButton.value = 'Make incorrect';
+    else
+      correctButton.value = 'Make correct';
   }
 };

@@ -23,6 +23,8 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         node.markup = [];
         node.comment = ''; // Comment on this node
         node.hash = 0;
+        node.correctSource = false;
+        node.correct = false;
     }
     initNode(root, null); // Initialize root node with null parent
     root.relevantMoves = [];
@@ -289,6 +291,8 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     root.addChild = function(child)
     {
       this.children.push(child);
+      this.correct = false;
+      this.correctSource = false;
     };
 
     // Remove child node from this node, returning false if failed
@@ -384,9 +388,6 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       this.hash = 1;
       for (var key in this.board)
         this.hash += hashCode(key) * this.board[key];
-      /*if (this.move)
-        window.alert("hash updated for " + this.move.x + ", " + this.move.y + " to " + this.hash);
-      this.comment = this.hash;*/
       return this.hash
     }
 
@@ -446,6 +447,17 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       var index = this.fromXY(this.move.x, this.move.y);
       myRoot.relevantMoves[index] = true;
       besogo.addVirtualChildren(myRoot, this);
+    }
+
+    root.setCorrectSource = function(value, editor)
+    {
+      if (value === this.correctSource)
+        return;
+      if (this.children.length > 0 || this.virtualChildren.length > 0)
+        return;
+      this.correctSource = value;
+      besogo.updateCorrectValues(this.getRoot());
+      editor.notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
     }
 
     return root;

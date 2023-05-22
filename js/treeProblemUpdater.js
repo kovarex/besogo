@@ -67,6 +67,7 @@ besogo.addVirtualChildren = function(root, node, addHash = true)
         redirect.move.color = node.nextMove();
         node.virtualChildren.push(redirect);
         redirect.target.virtualParents.push(node);
+        node.correctSource = false;
       }
     }
   }
@@ -107,10 +108,18 @@ besogo.clearCorrectValues = function(node)
 
 besogo.updateCorrectValues = function(node)
 {
-  if ('correct' in node)
-    return node.correct;
+  if (node.comment.startsWith("+"))
+  {
+    if (!node.correctSource)
+    {
+      node.correctSource = true;
+      node.comment = node.comment.substr(1);
+    }
+    node.correct = true;
+    return true;
+  }
 
-  if (node.comment === "+")
+  if (node.correctSource)
   {
     node.correct = true;
     return true;

@@ -8,13 +8,13 @@ besogo.create = function(container, options) {
         resizer, // Auto-resizing function
         boardDiv, // Board display container
         panelsDiv, // Parent container of panel divs
-        makers = { // Map to panel creators
-            control: besogo.makeControlPanel,
-            names: besogo.makeNamesPanel,
-            comment: besogo.makeCommentPanel,
-            tool: besogo.makeToolPanel,
-            tree: besogo.makeTreePanel,
-            file: besogo.makeFilePanel
+        makers = // Map to panel creators
+        {
+          control: besogo.makeControlPanel,
+          comment: besogo.makeCommentPanel,
+          tool: besogo.makeToolPanel,
+          tree: besogo.makeTreePanel,
+          file: besogo.makeFilePanel
         },
         insideText = container.textContent || container.innerText || '',
         i, panelName; // Scratch iteration variables
@@ -264,162 +264,174 @@ besogo.parseSize = function(input) {
 };
 
 // Automatically converts document elements into besogo instances
-besogo.autoInit = function() {
-    var allDivs = document.getElementsByTagName('div'), // Live collection of divs
-        targetDivs = [], // List of divs to auto-initialize
-        options, // Structure to hold options
-        i, j, attrs; // Scratch iteration variables
+besogo.autoInit = function()
+{
+  var allDivs = document.getElementsByTagName('div'), // Live collection of divs
+      targetDivs = [], // List of divs to auto-initialize
+      options, // Structure to hold options
+      attrs; // Scratch iteration variables
 
-    for (i = 0; i < allDivs.length; i++) { // Iterate over all divs
-        if ( (hasClass(allDivs[i], 'besogo-editor') || // Has an auto-init class
-              hasClass(allDivs[i], 'besogo-viewer') ||
-              hasClass(allDivs[i], 'besogo-diagram')) &&
-             !hasClass(allDivs[i], 'besogo-container') ) { // Not already initialized
-                targetDivs.push(allDivs[i]);
-        }
+  for (let i = 0; i < allDivs.length; i++) // Iterate over all divs
+    if ((hasClass(allDivs[i], 'besogo-editor') || // Has an auto-init class
+         hasClass(allDivs[i], 'besogo-viewer') ||
+         hasClass(allDivs[i], 'besogo-diagram')) &&
+        !hasClass(allDivs[i], 'besogo-container')) // Not already initialized
+      targetDivs.push(allDivs[i]);
+
+  for (let i = 0; i < targetDivs.length; i++) // Iterate over target divs
+  {
+    options = {}; // Clear the options struct
+    if (hasClass(targetDivs[i], 'besogo-editor'))
+    {
+      options.panels = ['control', 'comment', 'tool', 'tree', 'file'];
+      options.tool = 'auto';
+    }
+    else if (hasClass(targetDivs[i], 'besogo-viewer'))
+    {
+      options.panels = ['control', 'comment'];
+      options.tool = 'navOnly';
+    } else if (hasClass(targetDivs[i], 'besogo-diagram'))
+    {
+      options.panels = [];
+      options.tool = 'navOnly';
     }
 
-    for (i = 0; i < targetDivs.length; i++) { // Iterate over target divs
-        options = {}; // Clear the options struct
-        if (hasClass(targetDivs[i], 'besogo-editor')) {
-            options.panels = ['control', 'names', 'comment', 'tool', 'tree', 'file'];
-            options.tool = 'auto';
-        } else if (hasClass(targetDivs[i], 'besogo-viewer')) {
-            options.panels = ['control', 'names', 'comment'];
-            options.tool = 'navOnly';
-        } else if (hasClass(targetDivs[i], 'besogo-diagram')) {
-            options.panels = [];
-            options.tool = 'navOnly';
-        }
+    attrs = targetDivs[i].attributes;
+    for (let j = 0; j < attrs.length; j++) // Load attributes as options
+      options[attrs[j].name] = attrs[j].value;
+    besogo.create(targetDivs[i], options);
+  }
 
-        attrs = targetDivs[i].attributes;
-        for (j = 0; j < attrs.length; j++) { // Load attributes as options
-            options[attrs[j].name] = attrs[j].value;
-        }
-        besogo.create(targetDivs[i], options);
-    }
-
-    function hasClass(element, str) {
-        return (element.className.split(' ').indexOf(str) !== -1);
-    }
+  function hasClass(element, str) { return (element.className.split(' ').indexOf(str) !== -1); }
 };
 
 // Sets up keypress handling
-function addKeypressHandler(container, editor) {
-    if (!container.getAttribute('tabindex')) {
-        container.setAttribute('tabindex', '0'); // Set tabindex to allow div focusing
-    }
+function addKeypressHandler(container, editor)
+{
+  if (!container.getAttribute('tabindex'))
+    container.setAttribute('tabindex', '0'); // Set tabindex to allow div focusing
 
-    container.addEventListener('keydown', function(evt) {
-        evt = evt || window.event;
-        switch (evt.keyCode) {
-            case 33: // page up
-                editor.prevNode(10);
-                break;
-            case 34: // page down
-                editor.nextNode(10);
-                break;
-            case 35: // end
-                editor.nextNode(-1);
-                break;
-            case 36: // home
-                editor.prevNode(-1);
-                break;
-            case 37: // left
-                if ( evt.shiftKey ) {
-                    editor.prevBranchPoint();
-                } else {
-                    editor.prevNode(1);
-                }
-                break;
-            case 38: // up
-                editor.nextSibling(-1);
-                break;
-            case 39: // right
-                editor.nextNode(1);
-                break;
-            case 40: // down
-                editor.nextSibling(1);
-                break;
-            case 46: // delete
-                editor.cutCurrent();
-                break;
-        } // END switch (evt.keyCode)
-        if (evt.keyCode >= 33 && evt.keyCode <= 40) {
-            evt.preventDefault(); // Suppress page nav controls
-        }
-    }); // END func() and addEventListener
-} // END function addKeypressHandler
+  container.addEventListener('keydown', function(evt)
+    {
+      evt = evt || window.event;
+      switch (evt.keyCode)
+      {
+        case 33: // page up
+          editor.prevNode(10);
+          break;
+        case 34: // page down
+          editor.nextNode(10);
+          break;
+        case 35: // end
+          editor.nextNode(-1);
+          break;
+        case 36: // home
+          editor.prevNode(-1);
+          break;
+        case 37: // left
+          if (evt.shiftKey)
+            editor.prevBranchPoint();
+          else
+            editor.prevNode(1);
+          break;
+        case 38: // up
+          editor.nextSibling(-1);
+          break;
+        case 39: // right
+          editor.nextNode(1);
+          break;
+        case 40: // down
+          editor.nextSibling(1);
+          break;
+        case 46: // delete
+          editor.cutCurrent();
+          break;
+      }
+      if (evt.keyCode >= 33 && evt.keyCode <= 40)
+        evt.preventDefault(); // Suppress page nav controls
+  });
+}
 
 // Sets up mousewheel handling
-function addWheelHandler(boardDiv, editor) {
-    boardDiv.addEventListener('wheel', function(evt) {
-        evt = evt || window.event;
-        if (evt.deltaY > 0) {
-            editor.nextNode(1);
-            evt.preventDefault();
-        } else if (evt.deltaY < 0) {
-            editor.prevNode(1);
-            evt.preventDefault();
-        }
-    });
+function addWheelHandler(boardDiv, editor)
+{
+  boardDiv.addEventListener('wheel', function(evt)
+  {
+    evt = evt || window.event;
+    if (evt.deltaY > 0)
+    {
+        editor.nextNode(1);
+        evt.preventDefault();
+    }
+    else if (evt.deltaY < 0)
+    {
+      editor.prevNode(1);
+      evt.preventDefault();
+    }
+  });
 }
 
 // Parses SGF string and loads into editor
-function parseAndLoad(text, editor) {
-    var sgf;
-    try {
-        sgf = besogo.parseSgf(text);
-    } catch (error) {
-        return; // Silently fail on parse error
-    }
-    besogo.loadSgf(sgf, editor);
+function parseAndLoad(text, editor)
+{
+  var sgf;
+  try
+  {
+    sgf = besogo.parseSgf(text);
+  }
+  catch (error)
+  {
+    return; // Silently fail on parse error
+  }
+  besogo.loadSgf(sgf, editor);
 }
 
 // Fetches text file at url from same domain
-function fetchParseLoad(url, editor, path) {
-    var http = new XMLHttpRequest();
+function fetchParseLoad(url, editor, path)
+{
+  var http = new XMLHttpRequest();
 
-    http.onreadystatechange = function() {
-        if (http.readyState === 4 && http.status === 200) { // Successful fetch
-            parseAndLoad(http.responseText, editor);
-            navigatePath(editor, path);
-        }
-    };
-    http.overrideMimeType('text/plain'); // Prevents XML parsing and warnings
-    http.open("GET", url, true); // Asynchronous load
-    http.send();
+  http.onreadystatechange = function()
+  {
+    if (http.readyState === 4 && http.status === 200) // Successful fetch
+    {
+      parseAndLoad(http.responseText, editor);
+      navigatePath(editor, path);
+    }
+  };
+  http.overrideMimeType('text/plain'); // Prevents XML parsing and warnings
+  http.open("GET", url, true); // Asynchronous load
+  http.send();
 }
 
-function navigatePath(editor, path) {
-    var subPaths,
-        i, j; // Scratch iteration variables
+function navigatePath(editor, path)
+{
+  var subPaths;
+  path = path.split(/[Nn]+/); // Split into parts that start in next mode
+  for (let i = 0; i < path.length; i++)
+  {
+    subPaths = path[i].split(/[Bb]+/); // Split on switches into branch mode
+    executeMoves(subPaths[0], false); // Next mode moves
+    for (let j = 1; j < subPaths.length; j++) // Intentionally starting at 1
+      executeMoves(subPaths[j], true); // Branch mode moves
+  }
 
-    path = path.split(/[Nn]+/); // Split into parts that start in next mode
-    for (i = 0; i < path.length; i++) {
-        subPaths = path[i].split(/[Bb]+/); // Split on switches into branch mode
-        executeMoves(subPaths[0], false); // Next mode moves
-        for (j = 1; j < subPaths.length; j++) { // Intentionally starting at 1
-            executeMoves(subPaths[j], true); // Branch mode moves
+  function executeMoves(part, branch)
+  {
+    part = part.split(/\D+/); // Split on non-digits
+    for (let i = 0; i < part.length; i++)
+      if (part[i]) // Skip empty strings
+        if (branch)
+        { // Branch mode
+          if (editor.getCurrent().children.length)
+          {
+            editor.nextNode(1);
+            editor.nextSibling(part[i] - 1);
+          }
         }
-    }
-
-    function executeMoves(part, branch) {
-        var i;
-        part = part.split(/\D+/); // Split on non-digits
-        for (i = 0; i < part.length; i++) {
-            if (part[i]) { // Skip empty strings
-                if (branch) { // Branch mode
-                    if (editor.getCurrent().children.length) {
-                        editor.nextNode(1);
-                        editor.nextSibling(part[i] - 1);
-                    }
-                } else { // Next mode
-                    editor.nextNode(+part[i]); // Converts to number
-                }
-            }
-        }
-    }
+        else
+          editor.nextNode(+part[i]); // Converts to number
+  }
 }
 
 })(); // END closure

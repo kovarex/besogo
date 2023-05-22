@@ -346,13 +346,26 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       return this.hash
     }
 
+    function keyCount(a)
+    {
+      var i = 0;
+      for (var key in a) ++i;
+      return i;
+    }
+
+    function compareAssociativeArrays(a, b)
+    {
+      if (keyCount(a) != keyCount(b))
+        return false;
+      for (var key in a)
+        if (a[key] != b[key])
+          return false;
+       return true;
+    }
+
     root.samePositionAs = function(other)
     {
-      for (let x = 1; x <= sizeX; x++)
-        for (let y = 1; y <= sizeY; y++)
-          if (this.getStone(x, y) != other.getStone(x, y))
-            return false;
-      return true;
+      return compareAssociativeArrays(this.board, other.board);
     }
 
     root.treeSize = function()

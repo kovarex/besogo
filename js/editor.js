@@ -191,27 +191,39 @@ besogo.makeEditor = function(sizeX, sizeY) {
     }
 
     // Navigates forward num nodes (to the end if num === -1)
-    function nextNode(num) {
-        if (current.children.length === 0) { // Check if no children
-            return false; // Do nothing if no children (avoid notification)
+    function nextNode(num)
+    {
+      if (current.children.length + current.virtualChildren.length === 0) // Check if no children
+        return; // Do nothing if no children (avoid notification)
+      while (current.children.length + current.virtualChildren.length > 0 && num !== 0)
+      {
+        if (navHistory.length) // Non-empty navigation history
+          current = navHistory.pop();
+        else // Empty navigation history
+        {
+          if (current.children.length)
+          {
+            current.children[0].cameFrom = null;
+            current = current.children[0]; // Go to first child
+          }
+          else
+          {
+            var target = current.virtualChildren[0].target;
+            target.cameFrom = current;
+            current = target;
+          }
         }
-        while (current.children.length > 0 && num !== 0) {
-            if (navHistory.length) { // Non-empty navigation history
-                current = navHistory.pop();
-            } else { // Empty navigation history
-                current = current.children[0]; // Go to first child
-            }
-            num--;
-        }
-        // Notify listeners of navigation (with no tree edits)
-        notifyListeners({ navChange: true }, true); // Preserve history
+        num--;
+      }
+      // Notify listeners of navigation (with no tree edits)
+      notifyListeners({ navChange: true }, true); // Preserve history
     }
 
     // Navigates backward num nodes (to the root if num === -1)
     function prevNode(num)
     {
       if (!current.parent) // Check if root
-        return false; // Do nothing if already at root (avoid notification)
+        return; // Do nothing if already at root (avoid notification)
       while (current.parent && num !== 0)
       {
         navHistory.push(current); // Save current into navigation history

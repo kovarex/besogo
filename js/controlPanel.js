@@ -4,10 +4,8 @@ besogo.makeControlPanel = function(container, editor) {
         rightElements = [], // SVG elements for next node buttons
         siblingElements = [], // SVG elements for sibling buttons
         variantStyleButton, // Button for changing variant style
-        hideVariantButton, // Button for toggling show/hide variants
         childVariantElement, // SVG element for child style variants
-        siblingVariantElement, // SVG element for sibling style variants
-        hideVariantElement; // SVG element for hiding variants
+        siblingVariantElement; // SVG element for sibling style variants
 
     drawNavButtons();
     drawStyleButtons();
@@ -52,13 +50,6 @@ besogo.makeControlPanel = function(container, editor) {
                 childVariantElement.setAttribute('fill', besogo.BLUE);
                 siblingVariantElement.setAttribute('fill', besogo.RED);
                 variantStyleButton.title = 'Variants: [child]/sibling';
-            }
-            if (style >= 2) { // Hide auto-markup for variants
-                hideVariantElement.setAttribute('visibility', 'visible');
-                hideVariantButton.title = 'Variants: show/[hide]';
-            } else { // Show auto-markup for variants
-                hideVariantElement.setAttribute('visibility', 'hidden');
-                hideVariantButton.title = 'Variants: [show]/hide';
             }
         }
 
@@ -169,17 +160,6 @@ besogo.makeControlPanel = function(container, editor) {
             stroke: 'none'
         });
         svg.appendChild(element);
-
-        hideVariantButton = document.createElement('button');
-        hideVariantButton.onclick = function() {
-            editor.toggleVariantStyle(true); // Toggles show/hide variants
-        };
-        container.appendChild(hideVariantButton);
-        svg = makeButtonContainer();
-        hideVariantButton.appendChild(svg);
-        svg.appendChild(besogo.svgLabel(50, 50, besogo.RED, 'A'));
-        hideVariantElement = besogo.svgCross(50, 50, 'black');
-        svg.appendChild(hideVariantElement);
 
         coordStyleButton = document.createElement('button');
         coordStyleButton.onclick = function() {

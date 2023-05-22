@@ -57,9 +57,8 @@ besogo.makeBoardDisplay = function(container, editor) {
 
         addEventTargets(); // Add mouse event listener layer
 
-        if (editor.REAL_STONES) { // Generate index for realistic stone images
-            randomizeIndex();
-        }
+        if (editor.REAL_STONES) // Generate index for realistic stone images
+          randomizeIndex();
     }
 
     // Callback for board display redraws
@@ -100,11 +99,11 @@ besogo.makeBoardDisplay = function(container, editor) {
     }
 
     // Initializes the SVG element and draws the board
-    function drawBoard(coord) {
+    function drawBoard(coord)
+    {
         var boardWidth,
             boardHeight,
-            string = "", // Path string for inner board lines
-            i; // Scratch iteration variable
+            string = ""; // Path string for inner board lines
 
         BOARD_MARGIN = (coord === 'none' ? 0 : COORD_MARGIN) + EXTRA_MARGIN;
         boardWidth = 2*BOARD_MARGIN + sizeX*CELL_SIZE;
@@ -130,25 +129,23 @@ besogo.makeBoardDisplay = function(container, editor) {
             'class': 'besogo-svg-lines'
         }) );
 
-        for (i = 2; i <= (sizeY - 1); i++) { // Horizontal inner lines
-            string += "M" + svgPos(1) + "," + svgPos(i) + "h" + CELL_SIZE*(sizeX - 1);
-        }
-        for (i = 2; i <= (sizeX - 1); i++) { // Vertical inner lines
+        for (let i = 2; i <= (sizeY - 1); i++) // Horizontal inner lines
+          string += "M" + svgPos(1) + "," + svgPos(i) + "h" + CELL_SIZE*(sizeX - 1);
+        for (let i = 2; i <= (sizeX - 1); i++) // Vertical inner lines
             string += "M" + svgPos(i) + "," + svgPos(1) + "v" + CELL_SIZE*(sizeY - 1);
-        }
         svg.appendChild( besogo.svgEl("path", { // Draw inner lines of board
             d: string,
             'class': 'besogo-svg-lines'
         }) );
 
         drawHoshi(); // Draw the hoshi points
-        if (coord !== 'none') {
-            drawCoords(coord); // Draw the coordinate labels
-        }
+        if (coord !== 'none')
+          drawCoords(coord); // Draw the coordinate labels
     }
 
     // Draws coordinate labels on the board
-    function drawCoords(coord) {
+    function drawCoords(coord)
+    {
         var labels = besogo.coord[coord](sizeX, sizeY),
             labelXa = labels.x, // Top edge labels
             labelXb = labels.xb || labels.x, // Bottom edge
@@ -157,133 +154,138 @@ besogo.makeBoardDisplay = function(container, editor) {
             shift = COORD_MARGIN + 10,
             i, x, y; // Scratch iteration variable
 
-        for (i = 1; i <= sizeX; i++) { // Draw column coordinate labels
-            x = svgPos(i);
-            drawCoordLabel(x, svgPos(1) - shift, labelXa[i]);
-            drawCoordLabel(x, svgPos(sizeY) + shift, labelXb[i]);
+        for (let i = 1; i <= sizeX; i++) // Draw column coordinate labels
+        {
+          x = svgPos(i);
+          drawCoordLabel(x, svgPos(1) - shift, labelXa[i]);
+          drawCoordLabel(x, svgPos(sizeY) + shift, labelXb[i]);
         }
 
-        for (i = 1; i <= sizeY; i++) { // Draw row coordinate labels
-            y = svgPos(i);
-            drawCoordLabel(svgPos(1) - shift, y, labelYa[i]);
-            drawCoordLabel(svgPos(sizeX) + shift, y, labelYb[i]);
+        for (let i = 1; i <= sizeY; i++) // Draw row coordinate labels
+        {
+          y = svgPos(i);
+          drawCoordLabel(svgPos(1) - shift, y, labelYa[i]);
+          drawCoordLabel(svgPos(sizeX) + shift, y, labelYb[i]);
         }
 
-        function drawCoordLabel(x, y, label) {
-            var element = besogo.svgEl("text", {
-                x: x,
-                y: y,
-                dy: ".65ex", // Seems to work for vertically centering these fonts
-                "font-size": 32,
-                "text-anchor": "middle", // Horizontal centering
-                "font-family": "Helvetica, Arial, sans-serif",
-                fill: 'black'
-            });
-            element.appendChild( document.createTextNode(label) );
-            svg.appendChild(element);
+        function drawCoordLabel(x, y, label)
+        {
+          var element = besogo.svgEl("text", {
+              x: x,
+              y: y,
+              dy: ".65ex", // Seems to work for vertically centering these fonts
+              "font-size": 32,
+              "text-anchor": "middle", // Horizontal centering
+              "font-family": "Helvetica, Arial, sans-serif",
+              fill: 'black'
+          });
+          element.appendChild( document.createTextNode(label) );
+          svg.appendChild(element);
         }
     }
 
     // Draws hoshi onto the board at procedurally generated locations
-    function drawHoshi() {
-        var cx, cy, // Center point calculation
-            pathStr = ""; // Path string for drawing star points
+    function drawHoshi()
+    {
+      var cx, cy, // Center point calculation
+          pathStr = ""; // Path string for drawing star points
 
-        if (sizeX % 2 && sizeY % 2) { // Draw center hoshi if both dimensions are odd
-            cx = (sizeX - 1)/2 + 1; // Calculate the center of the board
-            cy = (sizeY - 1)/2 + 1;
-            drawStar(cx, cy);
+      if (sizeX % 2 && sizeY % 2) { // Draw center hoshi if both dimensions are odd
+          cx = (sizeX - 1)/2 + 1; // Calculate the center of the board
+          cy = (sizeY - 1)/2 + 1;
+          drawStar(cx, cy);
 
-            if (sizeX >= 17 && sizeY >= 17) { // Draw side hoshi if at least 17x17 and odd
-                drawStar(4, cy);
-                drawStar(sizeX - 3, cy);
-                drawStar(cx, 4);
-                drawStar(cx, sizeY - 3);
-            }
-        }
+          if (sizeX >= 17 && sizeY >= 17) { // Draw side hoshi if at least 17x17 and odd
+              drawStar(4, cy);
+              drawStar(sizeX - 3, cy);
+              drawStar(cx, 4);
+              drawStar(cx, sizeY - 3);
+          }
+      }
 
-        if (sizeX >= 11 && sizeY >= 11) { // Corner hoshi at (4, 4) for larger sizes
-            drawStar(4, 4);
-            drawStar(4, sizeY - 3);
-            drawStar(sizeX - 3, 4);
-            drawStar(sizeX - 3, sizeY - 3);
-        } else if (sizeX >= 8 && sizeY >= 8) { // Corner hoshi at (3, 3) for medium sizes
-            drawStar(3, 3);
-            drawStar(3, sizeY - 2);
-            drawStar(sizeX - 2, 3);
-            drawStar(sizeX - 2, sizeY - 2);
-        } // No corner hoshi for smaller sizes
+      if (sizeX >= 11 && sizeY >= 11) // Corner hoshi at (4, 4) for larger sizes
+      {
+        drawStar(4, 4);
+        drawStar(4, sizeY - 3);
+        drawStar(sizeX - 3, 4);
+        drawStar(sizeX - 3, sizeY - 3);
+      }
+      else if (sizeX >= 8 && sizeY >= 8) // Corner hoshi at (3, 3) for medium sizes
+      {
+        drawStar(3, 3);
+        drawStar(3, sizeY - 2);
+        drawStar(sizeX - 2, 3);
+        drawStar(sizeX - 2, sizeY - 2);
+      } // No corner hoshi for smaller sizes
 
-        if (pathStr) { // Only need to add if hoshi drawn
-            svg.appendChild( besogo.svgEl('path', { // Drawing circles via path points
-                d: pathStr, // Hack to allow radius adjustment via stroke-width
-                'stroke-linecap': 'round', // Makes the points round
-                'class': 'besogo-svg-hoshi'
-            }) );
-        }
+      if (pathStr) // Only need to add if hoshi drawn
+        svg.appendChild(besogo.svgEl('path', { // Drawing circles via path points
+            d: pathStr, // Hack to allow radius adjustment via stroke-width
+            'stroke-linecap': 'round', // Makes the points round
+            'class': 'besogo-svg-hoshi'
+        }) );
 
-        function drawStar(i, j) { // Extend path string to draw star point
-            pathStr += "M" + svgPos(i) + ',' + svgPos(j) + 'l0,0'; // Draws a point
-        }
+      function drawStar(i, j) // Extend path string to draw star point
+      {
+        pathStr += "M" + svgPos(i) + ',' + svgPos(j) + 'l0,0'; // Draws a point
+      }
     }
 
     // Remakes the randomized index for stone images
-    function randomizeIndex() {
-        var maxIndex = besogo.BLACK_STONES * besogo.WHITE_STONES,
-            i, j;
+    function randomizeIndex()
+    {
+      var maxIndex = besogo.BLACK_STONES * besogo.WHITE_STONES;
 
-        randIndex = [];
-        for (i = 1; i <= sizeX; i++) {
-            for (j = 1; j <= sizeY; j++) {
-                randIndex[fromXY(i, j)] = Math.floor(Math.random() * maxIndex);
-            }
-        }
+      randIndex = [];
+      for (let i = 1; i <= sizeX; i++)
+        for (let j = 1; j <= sizeY; j++)
+          randIndex[fromXY(i, j)] = Math.floor(Math.random() * maxIndex);
     }
 
     // Adds a grid of squares to register mouse events
-    function addEventTargets() {
-        var element,
-            i, j;
+    function addEventTargets()
+    {
+      for (let i = 1; i <= sizeX; i++)
+        for (let j = 1; j <= sizeY; j++)
+        {
+          var element = besogo.svgEl("rect", { // Make a transparent event target
+              x: svgPos(i) - CELL_SIZE/2,
+              y: svgPos(j) - CELL_SIZE/2,
+              width: CELL_SIZE,
+              height: CELL_SIZE,
+              opacity: 0
+          });
 
-        for (i = 1; i <= sizeX; i++) {
-            for (j = 1; j <= sizeY; j++) {
-                element = besogo.svgEl("rect", { // Make a transparent event target
-                    x: svgPos(i) - CELL_SIZE/2,
-                    y: svgPos(j) - CELL_SIZE/2,
-                    width: CELL_SIZE,
-                    height: CELL_SIZE,
-                    opacity: 0
-                });
+          // Add event listeners, using closures to decouple (i, j)
+          element.addEventListener("click", handleClick(i, j));
 
-                // Add event listeners, using closures to decouple (i, j)
-                element.addEventListener("click", handleClick(i, j));
+          if (!TOUCH_FLAG) { // Skip hover listeners for touch interfaces
+              element.addEventListener("mouseover", handleOver(i, j));
+              element.addEventListener("mouseout", handleOut(i, j));
+          }
 
-                if (!TOUCH_FLAG) { // Skip hover listeners for touch interfaces
-                    element.addEventListener("mouseover", handleOver(i, j));
-                    element.addEventListener("mouseout", handleOut(i, j));
-                }
-
-                svg.appendChild(element);
-            }
+          svg.appendChild(element);
         }
     }
 
-    function handleClick(i, j) { // Returns function for click handling
-        return function(event) {
-            // Call click handler in editor
-            editor.click(i, j, event.ctrlKey, event.shiftKey);
-            if(!TOUCH_FLAG) {
-                (handleOver(i, j))(); // Ensures that any updated tool is visible
-            }
-        };
+    function handleClick(i, j) // Returns function for click handling
+    {
+      return function(event)
+      {
+        // Call click handler in editor
+        editor.click(i, j, event.ctrlKey, event.shiftKey);
+        if(!TOUCH_FLAG)
+          (handleOver(i, j))(); // Ensures that any updated tool is visible
+      };
     }
-    function handleOver(i, j) { // Returns function for mouse over
-        return function() {
-            var element = hoverLayer[ fromXY(i, j) ];
-            if (element) { // Make tool action visible on hover over
-                element.setAttribute('visibility', 'visible');
-            }
-        };
+    function handleOver(i, j) // Returns function for mouse over
+    {
+      return function()
+      {
+        var element = hoverLayer[ fromXY(i, j) ];
+        if (element) // Make tool action visible on hover over
+          element.setAttribute('visibility', 'visible');
+      };
     }
     function handleOut(i, j) { // Returns function for mouse off
         return function() {

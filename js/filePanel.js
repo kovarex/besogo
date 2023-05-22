@@ -33,9 +33,9 @@ besogo.makeFilePanel = function(container, editor) {
     element.title = 'Export SGF';
     element.onclick = function()
     {
-      var fileName = prompt('Save file as', 'export.sgf');
+      var fileName = prompt('Save file as', 'export');
       if (fileName) // Canceled or empty string does nothing
-          saveFile(fileName, besogo.composeSgf(editor));
+        saveFile(fileName + ".sgf", besogo.composeSgf(editor));
     };
     container.appendChild(element);
 
@@ -46,9 +46,9 @@ besogo.makeFilePanel = function(container, editor) {
     element.title = 'Export SGF export with all virtual variations expanded';
     element.onclick = function()
     {
-      var fileName = prompt('Save file as', 'export.sgf');
+      var fileName = prompt('Save file as', 'export');
       if (fileName) // Canceled or empty string does nothing
-          saveFile(fileName, besogo.composeSgf(editor, true));
+        saveFile(fileName + ".sgf", besogo.composeSgf(editor, true));
     };
     container.appendChild(element);
 

@@ -108,6 +108,12 @@ besogo.clearCorrectValues = function(node)
 
 besogo.updateCorrectValues = function(node)
 {
+  besogo.clearCorrectValues(node);
+  besogo.updateCorrectValuesInternal(node);
+}
+
+besogo.updateCorrectValuesInternal = function(node)
+{
   if (node.comment.startsWith("+"))
   {
     if (!node.correctSource)
@@ -125,17 +131,20 @@ besogo.updateCorrectValues = function(node)
     return true;
   }
 
+  if (node.hasOwnProperty("correct"))
+    return node.correct;
+
   var hasLoss = false;
   var hasWin = false;
 
   for (let i = 0; i < node.children.length; ++i)
-    if (besogo.updateCorrectValues(node.children[i]))
+    if (besogo.updateCorrectValuesInternal(node.children[i]))
       hasWin = true;
     else
       hasLoss = true;
 
   for (let i = 0; i < node.virtualChildren.length; ++i)
-    if (besogo.updateCorrectValues(node.virtualChildren[i].target))
+    if (besogo.updateCorrectValuesInternal(node.virtualChildren[i].target))
       hasWin = true;
     else
       hasLoss = true;
@@ -144,6 +153,7 @@ besogo.updateCorrectValues = function(node)
   // This means, that if black can play a better move to get to a different variation, it is ok.
   // But if white can play a different move which leads to a variation good for black, white obviously wouldn'tags
   // choose this move in this situation.
+
   if (node.nextIsBlack())
     node.correct = hasWin;
   else

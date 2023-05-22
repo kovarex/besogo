@@ -281,18 +281,19 @@ besogo.makeEditor = function(sizeX, sizeY) {
     }
 
     // Removes current branch from the tree
-    function cutCurrent() {
-        var parent = current.parent;
-        if (tool === 'navOnly') {
-            return; // Tree editing disabled in navOnly mode
-        }
-        if (parent) {
-            if (confirm("Delete this branch?") === true) {
-                parent.removeChild(current);
-                current = parent;
-                // Notify navigation and tree edited
-                notifyListeners({ treeChange: true, navChange: true });
-            }
+    function cutCurrent()
+    {
+      var parent = current.parent;
+      if (tool === 'navOnly')
+        return; // Tree editing disabled in navOnly mode
+      if (parent)
+        if (confirm("Delete this branch?") === true)
+        {
+          parent.removeChild(current);
+          current = parent;
+          besogo.updateCorrectValues(current.getRoot());
+          // Notify navigation and tree edited
+          notifyListeners({ treeChange: true, navChange: true });
         }
     }
 

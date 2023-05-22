@@ -46,7 +46,6 @@ besogo.makeEditor = function(sizeX, sizeY) {
         toggleCoordStyle: toggleCoordStyle,
         getCoordStyle: getCoordStyle,
         setCoordStyle: setCoordStyle,
-        toggleVariantStyle: toggleVariantStyle,
         getVariantStyle: getVariantStyle,
         setVariantStyle: setVariantStyle,
         getGameInfo: getGameInfo,
@@ -124,19 +123,6 @@ besogo.makeEditor = function(sizeX, sizeY) {
             coord = setCoord;
             notifyListeners({ coord: setCoord });
         }
-    }
-
-    // Toggles the style for showing variants
-    function toggleVariantStyle(toggleShow) {
-        var childStyle = variantStyle % 2, // 0: children, 1: siblings
-            showStyle = variantStyle - childStyle; // 0: show auto-markup, 2: hide
-        if (toggleShow) { // Truthy input toggles showing of auto-markup
-            showStyle = (showStyle + 2) % 4; // 0 => 2 or 2 => 0
-        } else { // Falsy input toggles child vs sibling style
-            childStyle = (childStyle + 1) % 2; // 0 => 1 or 1 => 0
-        }
-        variantStyle = childStyle + showStyle;
-        notifyListeners({ variantStyle: variantStyle, markupChange: true });
     }
 
     // Returns the variant style

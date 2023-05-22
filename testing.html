@@ -47,33 +47,36 @@
 
 <script type="text/javascript">
 (function() {
-    var options = { resize: "fill" },
-        searchString = location.search.substring(1), // Drop question mark
-        params = searchString.split("&"),
-        div = document.getElementById('target'), // Target div
-        i, value; // Scratch iteration variables
+  var options = { resize: "fill" },
+      searchString = location.search.substring(1), // Drop question mark
+      params = searchString.split("&"),
+      div = document.getElementById('target'), // Target div
+      i, value; // Scratch iteration variables
 
-    for (i = 0; i < params.length; i++) {
-        value = params[i].split("="); // Splits on all "=" symbols
-        options[value.shift()] = value.join("="); // First "=" separates value from name, rest are part of value
-    }
-    if (options.theme) { // Board style theme (overrides std theme if set)
-        addStyleLink('css/board-' + options.theme + '.css');
-    }
-    if (options.height && options.width && options.resize === 'fixed') {
-        div.style.height = options.height + 'px';
-        div.style.width = options.width + 'px';
-    }
+  for (i = 0; i < params.length; i++)
+  {
+    value = params[i].split("="); // Splits on all "=" symbols
+    options[value.shift()] = value.join("="); // First "=" separates value from name, rest are part of value
+  }
+  options.realstones = true;
+  if (options.theme) // Board style theme (overrides std theme if set)
+    addStyleLink('css/board-' + options.theme + '.css');
+  if (options.height && options.width && options.resize === 'fixed')
+  {
+    div.style.height = options.height + 'px';
+    div.style.width = options.width + 'px';
+  }
 
-    besogo.create(div, options);
+  besogo.create(div, options);
 
-    function addStyleLink(cssURL) {
-        var element = document.createElement('link');
-        element.href = cssURL;
-        element.type = 'text/css';
-        element.rel = 'stylesheet';
-        document.head.appendChild(element);
-    }
+  function addStyleLink(cssURL)
+  {
+    var element = document.createElement('link');
+    element.href = cssURL;
+    element.type = 'text/css';
+    element.rel = 'stylesheet';
+    document.head.appendChild(element);
+  }
 })();
 </script>
 

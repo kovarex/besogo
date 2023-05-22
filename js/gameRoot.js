@@ -53,11 +53,11 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
             return true; // Pass move successful
         }
 
-        if (this.getStone(x, y)) { // Check for overwrite
-            if (!allow) {
-                return false; // Reject overwrite move if not allowed
-            }
-            overwrite = true; // Otherwise, flag overwrite and proceed
+        if (this.getStone(x, y))  // Check for overwrite
+        {
+          if (!allow)
+            return false; // Reject overwrite move if not allowed
+          overwrite = true; // Otherwise, flag overwrite and proceed
         }
 
         testBoard = Object.create(this); // Copy board state (no need to initialize)
@@ -326,7 +326,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     root.getHash = function()
     {
-      if (this.hash)
+      if ('hash' in this)
         return this.hash;
       return this.updateHash();
     }
@@ -347,7 +347,10 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     {
       this.hash = 0;
       for (var key in this.board)
-        this.hash += hashCode(key) * this.board[key]
+        this.hash += hashCode(key) * this.board[key];
+      if (this.move)
+        window.alert("hash updated for " + this.move.x + ", " + this.move.y + " to " + this.hash);
+      this.comment = this.hash;
       return this.hash
     }
 
@@ -379,6 +382,26 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       for (let i = 0; i < this.children.length; ++i)
         result += this.children[i].treeSize();
       return result;
+    }
+    
+    root.getRoot = function()
+    {
+      let i = this;
+      while (i.parent)
+        i = i.parent;
+      return i;
+    }
+
+    root.getSameNode = function(root)
+    {
+      var hash = this.getHash();
+      var hashPoint = root.hashTable[hash];
+      if (!hashPoint)
+        return null;
+      for (let i = 0; i < hashPoint.length; ++i)
+        if (this.samePositionAs(hashPoint[i]))
+          return hashPoint[i];
+      return null;
     }
 
     return root;

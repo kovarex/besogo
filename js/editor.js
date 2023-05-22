@@ -390,18 +390,33 @@ besogo.makeEditor = function(sizeX, sizeY) {
             children = current.children;
 
         // Look for move across children
-        for (i = 0; i < children.length; i++) {
-            move = children[i].move;
-            if (shiftKey) { // Search for move in branch
-                if (jumpToMove(x, y, children[i])) {
-                    return true;
-                }
-            } else if (move && move.x === x && move.y === y) {
-                current = children[i]; // Navigate to child if found
-                notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
-                return true;
-            }
+        for (i = 0; i < children.length; i++)
+        {
+          move = children[i].move;
+          if (shiftKey)  // Search for move in branch
+          {
+            if (jumpToMove(x, y, children[i]))
+              return true;
+          }
+          else if (move && move.x === x && move.y === y)
+          {
+            current = children[i]; // Navigate to child if found
+            notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
+            return true;
+          }
         }
+        
+        if (current.virtualChildren)
+          for (i = 0; i < current.virtualChildren.length; i++)
+          {
+            move = current.virtualChildren[i].move;
+            if (move.x === x && move.y === y)
+            {
+              current = current.virtualChildren[i].target;
+              notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
+              return true;
+            }
+          }
 
         if (shiftKey && jumpToMove(x, y, root, current)) {
             return true;

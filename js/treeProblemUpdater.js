@@ -21,26 +21,22 @@ besogo.addVirtualChildren = function(root, node)
         var testChild = testBoard.makeChild()
         if (testChild.playMove(x, y))
         {
-          var sameNode = besogo.getSameNode(root, testChild);
-          if (sameNode)
-            node.virtualChildren.push(sameNode);
+          
+          var sameNode = testChild.getSameNode(root);
+          if (sameNode && sameNode.parent != node)
+          {
+            var redirect = [];
+            redirect.target = sameNode;
+            redirect.move = [];
+            redirect.move.x = x;
+            redirect.move.y = y;
+            node.virtualChildren.push(redirect);
+          }
         }
       }
 
   for (let i = 0; i < node.children.length; ++i)
     besogo.addVirtualChildren(root, node.children[i]);
-}
-
-besogo.getSameNode = function(root, node)
-{
-  var hash = node.getHash();
-  var hashPoint = root.hashTable[hash];
-  if (!hashPoint)
-    return null;
-  for (let i = 0; i < hashPoint.length; ++i)
-    if (node.samePositionAs(hashPoint[i]))
-      return node;
-  return null;
 }
 
 besogo.updateTreeAsProblemInternal = function(root, node)
@@ -61,7 +57,7 @@ besogo.updateTreeAsProblemInternal = function(root, node)
   for (let i = 0; i < node.children.length;)
   {
     var child = node.children[i];
-    if (besogo.getSameNode(root, child))
+    if (child.getSameNode(root))
     {
       root.prunnedMoveCount += child.treeSize();
       node.removeChild(child);

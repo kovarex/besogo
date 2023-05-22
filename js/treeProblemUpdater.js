@@ -4,8 +4,6 @@ besogo.updateTreeAsProblem = function(root)
   besogo.pruneTree(root, root);
   window.alert("Pruned move count: " + root.prunnedMoveCount +
                " (out of original " + (root.prunnedMoveCount + root.treeSize()) + ")");
-  root.relevantMoves = [];
-  root.hashTable = [];
   besogo.addRelevantMoves(root, root)
   var test = 0;
   for (let i = 0; i < root.relevantMoves.length; ++i)

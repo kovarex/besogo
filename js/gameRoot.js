@@ -286,18 +286,37 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     };
 
     // Adds a child to this node
-    root.addChild = function(child) {
-        this.children.push(child);
+    root.addChild = function(child)
+    {
+      this.children.push(child);
     };
 
     // Remove child node from this node, returning false if failed
-    root.removeChild = function(child) {
-        var i = this.children.indexOf(child);
-        if (i !== -1) {
-            this.children.splice(i, 1);
-            return true;
+    root.removeChild = function(child)
+    {
+      var i = this.children.indexOf(child);
+      if (i !== -1)
+      {
+        for (let j = 0; j < child.virtualParents.length; ++j)
+          child.virtualParents[j].removeVirtualChild(child);
+        this.children.splice(i, 1);
+        return true;
+      }
+      return false;
+    };
+
+    root.removeVirtualChild = function(child)
+    {
+      for (let i = 0; i < this.virtualChildren.length; ++i)
+      {
+        var node = this.virtualChildren[i];
+        if (node.target == child)
+        {
+          this.virtualChildren.splice(i, 1);
+          return true;
         }
-        return false;
+      }
+      return false;
     };
 
     // Raises child variation to a higher precedence

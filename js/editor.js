@@ -208,17 +208,21 @@ besogo.makeEditor = function(sizeX, sizeY) {
     }
 
     // Navigates backward num nodes (to the root if num === -1)
-    function prevNode(num) {
-        if (current.parent === null) { // Check if root
-            return false; // Do nothing if already at root (avoid notification)
-        }
-        while (current.parent && num !== 0) {
-            navHistory.push(current); // Save current into navigation history
-            current = current.parent;
-            num--;
-        }
-        // Notify listeners of navigation (with no tree edits)
-        notifyListeners({ navChange: true }, true); // Preserve history
+    function prevNode(num)
+    {
+      if (!current.parent) // Check if root
+        return false; // Do nothing if already at root (avoid notification)
+      while (current.parent && num !== 0)
+      {
+        navHistory.push(current); // Save current into navigation history
+        if (current.cameFrom)
+          current = current.cameFrom;
+        else
+          current = current.parent;
+        num--;
+      }
+      // Notify listeners of navigation (with no tree edits)
+      notifyListeners({ navChange: true }, true); // Preserve history
     }
 
     // Cyclically switches through siblings
@@ -403,6 +407,7 @@ besogo.makeEditor = function(sizeX, sizeY) {
           let move = child.move;
           if (move.x === x && move.y === y)
           {
+            child.target.cameFrom = current;
             current = child.target;
             notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
             return true;

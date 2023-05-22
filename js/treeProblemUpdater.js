@@ -18,22 +18,20 @@ besogo.addVirtualChildren = function(root, node)
     for (let y = 1; y <= sizeY; y++)
       if (!node.getStone(x, y))
       {
-        var testBoard = Object.create(node);
-        var testChild = testBoard.makeChild()
-        if (testChild.playMove(x, y))
+        var testChild = node.makeChild()
+        if (!testChild.playMove(x, y))
+          node.removeChild(testChild);
+
+        var sameNode = testChild.getSameNode(root);
+        if (sameNode && sameNode.parent != node)
         {
-          
-          var sameNode = testChild.getSameNode(root);
-          if (sameNode && sameNode.parent != node)
-          {
-            var redirect = [];
-            redirect.target = sameNode;
-            redirect.move = [];
-            redirect.move.x = x;
-            redirect.move.y = y;
-            redirect.move.color = node.nextMove();
-            node.virtualChildren.push(redirect);
-          }
+          var redirect = [];
+          redirect.target = sameNode;
+          redirect.move = [];
+          redirect.move.x = x;
+          redirect.move.y = y;
+          redirect.move.color = node.nextMove();
+          node.virtualChildren.push(redirect);
         }
       }
 

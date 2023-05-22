@@ -159,21 +159,15 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     }
 
     // Get next to move
-    root.nextMove = function() {
-        var x, y, count = 0;
-        if (this.lastMove) { // If a move has been played
-            return -this.lastMove; // Then next is opposite of last move
-        } else { // No moves have been played
-            for (x = 1; x <= sizeX; x++) {
-                for (y = 1; y <= sizeY; y++) {
-                    // Counts up difference between black and white set stones
-                    count += this.getStone(x, y);
-                }
-            }
-            // White's turn if strictly more black stones are set
-            return (count < 0) ? WHITE : BLACK;
-        }
+    root.nextMove = function()
+    {
+      if (this.lastMove) // If a move has been played
+        return -this.lastMove; // Then next is opposite of last move
+      else
+        return BLACK; // otherwise, black plays first
     };
+
+    root.nextIsBlack = function() { return this.nextMove() == BLACK; }
 
     // Places a setup stone, returns true if successful
     root.placeSetup = function(x, y, color) {

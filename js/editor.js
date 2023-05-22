@@ -306,13 +306,12 @@ besogo.makeEditor = function(sizeX, sizeY) {
     }
 
     // Raises current variation to a higher precedence
-    function promote() {
-        if (tool === 'navOnly') {
-            return; // Tree editing disabled in navOnly mode
-        }
-        if (current.parent && current.parent.promote(current)) {
-            notifyListeners({ treeChange: true }); // Notify tree edited
-        }
+    function promote()
+    {
+      if (tool === 'navOnly')
+        return; // Tree editing disabled in navOnly mode
+      if (current.parent && current.parent.promote(current))
+        notifyListeners({ treeChange: true }); // Notify tree edited
     }
 
     // Drops current variation to a lower precedence
@@ -409,10 +408,11 @@ besogo.makeEditor = function(sizeX, sizeY) {
         if (current.virtualChildren)
           for (i = 0; i < current.virtualChildren.length; i++)
           {
-            move = current.virtualChildren[i].move;
+            var child = current.virtualChildren[i];
+            move = child.move;
             if (move.x === x && move.y === y)
             {
-              current = current.virtualChildren[i].target;
+              current = child.target;
               notifyListeners({ navChange: true }); // Notify navigation (with no tree edits)
               return true;
             }

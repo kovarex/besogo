@@ -2,10 +2,12 @@ besogo.updateTreeAsProblem = function(root)
 {
   root.hashTable = []
   root.prunnedMoveCount = 0;
-  besogo.updateTreeAsProblemInternal(root, root);
+  besogo.pruneTree(root, root);
   window.alert("Pruned move count: " + root.prunnedMoveCount +
                " (out of original " + (root.prunnedMoveCount + root.treeSize()) + ")");
   besogo.addVirtualChildren(root, root);
+  besogo.clearCorrectValues(root);
+  besogo.updateCorrectValues(root);
 };
 
 besogo.addVirtualChildren = function(root, node)
@@ -39,21 +41,13 @@ besogo.addVirtualChildren = function(root, node)
     besogo.addVirtualChildren(root, node.children[i]);
 }
 
-besogo.updateTreeAsProblemInternal = function(root, node)
+besogo.pruneTree = function(root, node)
 {
   var hash = node.getHash();
   if (!root.hashTable[hash])
     root.hashTable[hash] = []
   root.hashTable[hash].push(node)
 
-  if (node.comment === "+")
-  {
-    node.correct = true;
-    return true;
-  }
-  
-  node.correct = false;
-  
   for (let i = 0; i < node.children.length;)
   {
     var child = node.children[i];
@@ -64,10 +58,53 @@ besogo.updateTreeAsProblemInternal = function(root, node)
     }
     else
     {
-      if (besogo.updateTreeAsProblemInternal(root, child))
-        node.correct = true;
+      besogo.pruneTree(root, child);
       ++i;
     }
   }
+};
+
+besogo.clearCorrectValues = function(node)
+{
+  delete node.correct;
+  for (let i = 0; i < node.children.length; ++i)
+    besogo.clearCorrectValues(node.children[i]);
+}
+
+besogo.updateCorrectValues = function(node)
+{
+  if ('correct' in node)
+    return node.correct;
+
+  if (node.comment === "+")
+  {
+    node.correct = true;
+    return true;
+  }
+
+  var hasLoss = false;
+  var hasWin = false;
+
+  for (let i = 0; i < node.children.length; ++i)
+    if (besogo.updateCorrectValues(node.children[i]))
+      hasWin = true;
+    else
+      hasLoss = true;
+
+  for (let i = 0; i < node.virtualChildren.length; ++i)
+    if (besogo.updateCorrectValues(node.virtualChildren[i].target))
+      hasWin = true;
+    else
+      hasLoss = true;
+
+  // We assume here, that black is player, white is the enemy.
+  // This means, that if black can play a better move to get to a different variation, it is ok.
+  // But if white can play a different move which leads to a variation good for black, white obviously wouldn'tags
+  // choose this move in this situation.
+  if (node.nextIsBlack())
+    node.correct = hasWin;
+  else
+    node.correct = hasWin && !hasLoss;
+
   return node.correct;
 };

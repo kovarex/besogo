@@ -330,5 +330,44 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         return (x - 1) * sizeY + (y - 1);
     }
 
+    root.getHash = function()
+    {
+      if (this.hash)
+        return this.hash;
+      return this.updateHash();
+    }
+
+    root.updateHash = function()
+    {
+      this.hash = 0;
+      for (let x = 1; x <= sizeX; x++)
+        for (let y = 1; y <= sizeY; y++)
+        {
+          var stone = this.getStone(x, y);
+          if (stone === WHITE)
+            this.hash += x*6547 + y*7897;
+          else if (stone == BLACK)
+            this.hash += x*5783 + y*5681;
+        }
+      return this.hash
+    }
+
+    root.samePositionAs = function(other)
+    {
+      for (let x = 1; x <= sizeX; x++)
+        for (let y = 1; y <= sizeY; y++)
+          if (this.getStone(x, y) != other.getStone(x, y))
+            return false;
+      return true;
+    }
+
+    root.treeSize = function()
+    {
+      var result = 1;
+      for (let i = 0; i < this.children.length; ++i)
+        result += this.children[i].treeSize();
+      return result;
+    }
+
     return root;
 };

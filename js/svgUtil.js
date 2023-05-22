@@ -105,6 +105,15 @@ besogo.svgCircle = function(x, y, color, radius = 27) {
     });
 };
 
+besogo.svgFilledCircle = function(x, y, color, radius = 27) {
+    return besogo.svgEl("circle", {
+        cx: x,
+        cy: y,
+        r: radius,
+        fill: color
+    });
+};
+
 // Makes a square at (x, y)
 besogo.svgSquare = function(x, y, color) {
     return besogo.svgEl("rect", {

@@ -12,6 +12,7 @@ besogo.makeBoardDisplay = function(container, editor) {
         svg, // Holds the overall board display SVG element
         stoneGroup, // Group for stones
         markupGroup, // Group for markup
+        nextMoveGroup, // Group for next move markers
         hoverGroup, // Group for hover layer
         markupLayer, // Array of markup layer elements
         hoverLayer, // Array of hover layer elements
@@ -43,9 +44,11 @@ besogo.makeBoardDisplay = function(container, editor) {
 
         stoneGroup = besogo.svgEl("g");
         markupGroup = besogo.svgEl("g");
+        nextMoveGroup = besogo.svgEl("g");
 
         svg.appendChild(stoneGroup); // Add placeholder group for stone layer
         svg.appendChild(markupGroup); // Add placeholder group for markup layer
+        svg.appendChild(nextMoveGroup);
 
         if (!TOUCH_FLAG) {
             hoverGroup = besogo.svgEl("g");
@@ -79,6 +82,7 @@ besogo.makeBoardDisplay = function(container, editor) {
         if (reinit || msg.navChange || msg.stoneChange) {
             redrawStones(current);
             redrawMarkup(current);
+            redrawNextMoves(current);
             redrawHover(current);
         } else if (msg.markupChange || msg.treeChange) {
             redrawMarkup(current);
@@ -91,6 +95,7 @@ besogo.makeBoardDisplay = function(container, editor) {
     function redrawAll(current) {
         redrawStones(current);
         redrawMarkup(current);
+        redrawNextMoves(current);
         redrawHover(current);
     }
 
@@ -401,6 +406,20 @@ besogo.makeBoardDisplay = function(container, editor) {
         svg.replaceChild(group, markupGroup); // Replace the markup group
         markupGroup = group;
     } // END function redrawMarkup
+
+    function redrawNextMoves(current)
+    {
+      var group = besogo.svgEl("g");
+      for (let i = 0; i < current.children.length; ++i)
+      {
+        var child = current.children[i];
+        //window.alert(i + " Making circle at " + child.move.x + ", " + child.move.y + " with color: " + child.getCorrectColor());
+        var element = besogo.svgFilledCircle(svgPos(child.move.x), svgPos(child.move.y), child.getCorrectColor(), 15);
+        group.appendChild(element);
+      }
+      svg.replaceChild(group, nextMoveGroup); // Replace the markup group
+      nextMoveGroup = group;
+    }
 
     function makeBacker(x, y) { // Makes a label markup backer at (x, y)
         return besogo.svgEl("rect", {

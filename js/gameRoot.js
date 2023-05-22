@@ -19,10 +19,14 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
         node.move = null;
         node.setupStones = [];
+        node.virtualParents = [];
         node.markup = [];
         node.comment = ''; // Comment on this node
+        node.hash = 0;
     }
     initNode(root, null); // Initialize root node with null parent
+    root.relevantMoves = [];
+    root.hashTable = [];
 
     // Plays a move, returns true if successful
     // Set allow to truthy to allow overwrite, suicide and ko
@@ -36,7 +40,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         return false; // Move fails if node is immutable
 
       if (!color) // Falsy color indicates auto-color
-        color = this.nextMove(); 
+        color = this.nextMove();
 
       if (x < 1 || y < 1 || x > sizeX || y > sizeY)
       {
@@ -328,7 +332,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     {
       return (x - 1) * sizeY + (y - 1);
     }
-    
+
     root.toXY = function(value)
     {
       var result = [];
@@ -339,7 +343,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     root.getHash = function()
     {
-      if ('hash' in this)
+      if (this.hash)
         return this.hash;
       return this.updateHash();
     }
@@ -358,7 +362,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     root.updateHash = function()
     {
-      this.hash = 0;
+      this.hash = 1;
       for (var key in this.board)
         this.hash += hashCode(key) * this.board[key];
       /*if (this.move)
@@ -396,7 +400,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         result += this.children[i].treeSize();
       return result;
     }
-    
+
     root.getRoot = function()
     {
       let i = this;
@@ -415,6 +419,14 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         if (this.samePositionAs(hashPoint[i]))
           return hashPoint[i];
       return null;
+    }
+
+    root.registerInVirtualMoves = function()
+    {
+      var myRoot = this.getRoot();
+      var index = this.fromXY(this.move.x, this.move.y);
+      myRoot.relevantMoves[index] = true;
+      besogo.addVirtualChildren(myRoot, this);
     }
 
     return root;

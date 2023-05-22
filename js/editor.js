@@ -465,6 +465,7 @@ besogo.makeEditor = function(sizeX, sizeY) {
             current.addChild(next);
             current = next;
             // Notify tree change, navigation, and stone change
+            next.registerInVirtualMoves();
             notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
             edited = true;
           }
@@ -472,7 +473,9 @@ besogo.makeEditor = function(sizeX, sizeY) {
         } else if(current.playMove(i, j, color, allowAll))
         { // Play in current
             // Only need to update if move succeeds
+          current.registerInVirtualMoves();
           notifyListeners({ stoneChange: true }); // Stones changed
+
           edited = true;
         }
     }

@@ -1,17 +1,17 @@
 besogo.updateTreeAsProblem = function(root)
 {
-  root.hashTable = []
   root.prunnedMoveCount = 0;
   besogo.pruneTree(root, root);
   window.alert("Pruned move count: " + root.prunnedMoveCount +
                " (out of original " + (root.prunnedMoveCount + root.treeSize()) + ")");
   root.relevantMoves = [];
+  root.hashTable = [];
   besogo.addRelevantMoves(root, root)
   var test = 0;
   for (let i = 0; i < root.relevantMoves.length; ++i)
     if (root.relevantMoves[i])
       ++test;
-  besogo.addVirtualChildren(root, root);
+  besogo.addVirtualChildren(root, root, false);
   besogo.clearCorrectValues(root);
   besogo.updateCorrectValues(root);
 };
@@ -32,8 +32,16 @@ besogo.addRelevantMoves = function(root, node)
     besogo.addRelevantMoves(root, node.children[i]);
 }
 
-besogo.addVirtualChildren = function(root, node)
+besogo.addVirtualChildren = function(root, node, addHash = true)
 {
+  if (addHash)
+  {
+    var hash = node.getHash();
+    if (!root.hashTable[hash])
+      root.hashTable[hash] = []
+    root.hashTable[hash].push(node)
+  }
+
   var sizeX = root.getSize().x;
   var sizeY = root.getSize().y;
   for (let i = 0; i < root.relevantMoves.length; ++i)
@@ -45,7 +53,10 @@ besogo.addVirtualChildren = function(root, node)
     {
       var testChild = node.makeChild()
       if (!testChild.playMove(move.x, move.y))
+      {
         node.removeChild(testChild);
+        continue;
+      }
 
       var sameNode = testChild.getSameNode(root);
       if (sameNode && sameNode.parent != node)
@@ -57,12 +68,13 @@ besogo.addVirtualChildren = function(root, node)
         redirect.move.y = move.y;
         redirect.move.color = node.nextMove();
         node.virtualChildren.push(redirect);
+        redirect.target.virtualParents.push(node);
       }
     }
   }
 
   for (let i = 0; i < node.children.length; ++i)
-    besogo.addVirtualChildren(root, node.children[i]);
+    besogo.addVirtualChildren(root, node.children[i], addHash);
 }
 
 besogo.pruneTree = function(root, node)

@@ -60,41 +60,48 @@ besogo.makeFilePanel = function(container, editor) {
 
 
     // Makes a new board button
-    function makeNewBoardButton(size) {
-        var button = document.createElement('input');
-        button.type = 'button';
-        button.value = size + "x" + size;
-        if (size === '?') { // Make button for custom sized board
-            button.title = "New custom size board";
-            button.onclick = function()
-            {
-              var input = prompt("Enter custom size for new board" + "\n" + (editor.wasEdited() ? WARNING : ''), "19:19");
-              if (input)  // Canceled or empty string does nothing
-              {
-                var size = besogo.parseSize(input);
-                editor.loadRoot(besogo.makeGameRoot(size.x, size.y));
-                editor.setGameInfo({});
-              }
-            };
-        } else { // Make button for fixed size board
-            button.title = "New " + size + "x" + size + " board";
-            button.onclick = function() {
-                if (confirm(button.title + "?\n" + WARNING)) {
-                    editor.loadRoot(besogo.makeGameRoot(size, size));
-                    editor.setGameInfo({});
-                }
-            };
-        }
-        container.appendChild(button);
+    function makeNewBoardButton(size)
+    {
+      var button = document.createElement('input');
+      button.type = 'button';
+      button.value = size + "x" + size;
+      if (size === '?')
+      { // Make button for custom sized board
+        button.title = "New custom size board";
+        button.onclick = function()
+        {
+          var input = prompt("Enter custom size for new board" + "\n" + (editor.wasEdited() ? WARNING : ''), "19:19");
+          if (input)  // Canceled or empty string does nothing
+          {
+            var size = besogo.parseSize(input);
+            editor.loadRoot(besogo.makeGameRoot(size.x, size.y));
+            editor.setGameInfo({});
+          }
+        };
+      }
+      else
+      { // Make button for fixed size board
+        button.title = "New " + size + "x" + size + " board";
+        button.onclick = function()
+        {
+          if (!editor.wasEdited() || confirm(button.title + "?\n" + WARNING))
+          {
+            editor.loadRoot(besogo.makeGameRoot(size, size));
+            editor.setGameInfo({});
+          }
+        };
+      }
+      container.appendChild(button);
     }
 
     // Creates the file selector
-    function makeFileChooser() {
-        var chooser = document.createElement('input');
-        chooser.type = 'file';
-        chooser.style.display = 'none'; // Keep hidden
-        chooser.onchange = readFile; // Read, parse and load on file select
-        return chooser;
+    function makeFileChooser()
+    {
+      var chooser = document.createElement('input');
+      chooser.type = 'file';
+      chooser.style.display = 'none'; // Keep hidden
+      chooser.onchange = readFile; // Read, parse and load on file select
+      return chooser;
     }
 
     // Reads, parses and loads an SGF file
@@ -126,15 +133,16 @@ besogo.makeFilePanel = function(container, editor) {
     }
 
     // Composes SGF file and initializes download
-    function saveFile(fileName, text) {
-        var link = document.createElement('a'),
-            blob = new Blob([text], { encoding:"UTF-8", type:"text/plain;charset=UTF-8" });
+    function saveFile(fileName, text)
+    {
+      var link = document.createElement('a'),
+          blob = new Blob([text], { encoding:"UTF-8", type:"text/plain;charset=UTF-8" });
 
-        link.download = fileName; // Set download file name
-        link.href = URL.createObjectURL(blob);
-        link.style.display = 'none'; // Make link hidden
-        container.appendChild(link); // Add link to ensure that clicking works
-        link.click(); // Click on link to initiate download
-        container.removeChild(link); // Immediately remove the link
+      link.download = fileName; // Set download file name
+      link.href = URL.createObjectURL(blob);
+      link.style.display = 'none'; // Make link hidden
+      container.appendChild(link); // Add link to ensure that clicking works
+      link.click(); // Click on link to initiate download
+      container.removeChild(link); // Immediately remove the link
     }
 };

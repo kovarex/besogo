@@ -397,7 +397,7 @@ besogo.makeBoardDisplay = function(container, editor)
             element = besogo.svgLabel(x, y, color, mark);
           }
           group.appendChild(element);
-          markupLayer[ fromXY(i, j) ] = element;
+          markupLayer[fromXY(i, j)] = element;
         }
       }
     }
@@ -407,7 +407,10 @@ besogo.makeBoardDisplay = function(container, editor)
         !markupLayer[fromXY(lastMove.x, lastMove.y)]) // Last move not marked
     {
       var color = checkVariants(variants, current, lastMove.x, lastMove.y) ? besogo.PURP : besogo.BLUE;
-      var element = besogo.svgPlus(svgPos(lastMove.x), svgPos(lastMove.y), color);
+      var element = besogo.svgCircle(svgPos(lastMove.x),
+                                     svgPos(lastMove.y),
+                                     current.nextIsBlack() ? "black" : "white",
+                                     20, 4);
       group.appendChild(element);
       markupLayer[fromXY(lastMove.x, lastMove.y)] = element;
     }

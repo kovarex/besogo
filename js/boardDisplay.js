@@ -467,8 +467,6 @@ besogo.makeBoardDisplay = function(container, editor) {
       switch(editor.getTool())
       {
         case 'auto': return besogo.svgStone(x, y, current.nextMove());
-        case 'playB': return besogo.svgStone(x, y, -1);
-        case 'playW': return besogo.svgStone(x, y, 1);
         case 'addB':
           if (stone)
             return besogo.svgCross(x, y, besogo.RED);

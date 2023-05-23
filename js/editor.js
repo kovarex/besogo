@@ -10,8 +10,6 @@ besogo.makeEditor = function(sizeX, sizeY)
         // Enumeration of editor tools/modes
         TOOLS = ['navOnly', // read-only navigate mode
             'auto', // auto-mode: navigate or auto-play color
-            'playB', // play black stone
-            'playW', // play white stone
             'addB', // setup black stone
             'clrMark', // remove markup
             'circle', // circle markup
@@ -335,12 +333,6 @@ besogo.makeEditor = function(sizeX, sizeY)
         case 'auto':
           if (!navigate(i, j, shiftKey) && !shiftKey) // Try to navigate to (i, j)
             playMove(i, j, 0, ctrlKey); // Play auto-color move if navigate fails
-          break;
-        case 'playB':
-          playMove(i, j, -1, ctrlKey); // Black move
-          break;
-        case 'playW':
-          playMove(i, j, 1, ctrlKey); // White move
           break;
         case 'addB':
           if (ctrlKey)

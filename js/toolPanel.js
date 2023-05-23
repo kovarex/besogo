@@ -57,7 +57,7 @@ besogo.makeToolPanel = function(container, editor)
   makeButtonText('Pass', 'Pass move', function()
   {
     var tool = editor.getTool();
-    if (tool !== 'navOnly' && tool !== 'auto' && tool !== 'playB' && tool !== 'playW')
+    if (tool !== 'navOnly' && tool !== 'auto')
       editor.setTool('auto'); // Ensures that a move tool is selected
     editor.click(0, 0, false); // Clicking off the board signals a pass
   });

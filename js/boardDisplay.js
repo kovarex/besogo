@@ -353,78 +353,68 @@ besogo.makeBoardDisplay = function(container, editor)
   }
 
   // Redraws the markup
-  function redrawMarkup(current) {
-      var element, i, j, x, y, // Scratch iteration variables
-          group = besogo.svgEl("g"), // Group holding markup layer elements
-          lastMove = current.move,
-          variants = editor.getVariants(),
-          mark, // Scratch mark state {0, 1, 2, 3, 4, 5}
-          stone, // Scratch stone state {0, -1, 1}
-          color; // Scratch color string
+  function redrawMarkup(current)
+  {
+    var group = besogo.svgEl("g"), // Group holding markup layer elements
+        lastMove = current.move,
+        variants = editor.getVariants();
 
-      markupLayer = []; // Clear the references to the old layer
+    markupLayer = []; // Clear the references to the old layer
 
-      for (i = 1; i <= sizeX; i++) {
-          for (j = 1; j <= sizeY; j++) {
-              mark = current.getMarkup(i, j);
-              if (mark) {
-                  x = svgPos(i);
-                  y = svgPos(j);
-                  stone = current.getStone(i, j);
-                  color = (stone === -1) ? "white" : "black"; // White on black
-                  if (lastMove && lastMove.x === i && lastMove.y === j) {
-                      // Mark last move blue or violet if also a variant
-                      color = checkVariants(variants, current, i, j) ?
-                          besogo.PURP : besogo.BLUE;
-                  } else if (checkVariants(variants, current, i, j)) {
-                      color = besogo.RED; // Natural variant marks are red
-                  }
-                  if (typeof mark === 'number') { // Markup is a basic shape
-                      switch(mark) {
-                          case 1:
-                              element = besogo.svgCircle(x, y, color);
-                              break;
-                          case 2:
-                              element = besogo.svgSquare(x, y, color);
-                              break;
-                          case 3:
-                              element = besogo.svgTriangle(x, y, color);
-                              break;
-                          case 4:
-                              element = besogo.svgCross(x, y, color);
-                              break;
-                          case 5:
-                              element = besogo.svgBlock(x, y, color);
-                              break;
-                      }
-                  } else { // Markup is a label
-                      if (!stone) { // If placing label on empty spot
-                          element = makeBacker(x, y);
-                          group.appendChild(element);
-                      }
-                      element = besogo.svgLabel(x, y, color, mark);
-                  }
-                  group.appendChild(element);
-                  markupLayer[ fromXY(i, j) ] = element;
-              } // END if (mark)
-          } // END for j
-      } // END for i
-
-      // Mark last move with plus if not already marked
-      if (lastMove && lastMove.x !== 0 && lastMove.y !== 0) {
-          i = lastMove.x;
-          j = lastMove.y;
-          if (!markupLayer[ fromXY(i, j) ]) { // Last move not marked
-              color = checkVariants(variants, current, i, j) ? besogo.PURP : besogo.BLUE;
-              element = besogo.svgPlus(svgPos(i), svgPos(j), color);
-              group.appendChild(element);
-              markupLayer[ fromXY(i, j) ] = element;
+    for (let i = 1; i <= sizeX; i++)
+    {
+      for (let j = 1; j <= sizeY; j++)
+      {
+        if (mark = current.getMarkup(i, j))
+        {
+          var x = svgPos(i);
+          var y = svgPos(j);
+          var stone = current.getStone(i, j);
+          var color = (stone === -1) ? "white" : "black"; // White on black
+          if (lastMove && lastMove.x === i && lastMove.y === j) // Mark last move blue or violet if also a variant
+            color = checkVariants(variants, current, i, j) ? besogo.PURP : besogo.BLUE;
+          else if (checkVariants(variants, current, i, j))
+            color = besogo.RED; // Natural variant marks are red
+          var element = null;
+          if (typeof mark === 'number') // Markup is a basic shape
+          {
+            switch(mark)
+            {
+              case 1: element = besogo.svgCircle(x, y, color); break;
+              case 2: element = besogo.svgSquare(x, y, color); break;
+              case 3: element = besogo.svgTriangle(x, y, color); break;
+              case 4: element = besogo.svgCross(x, y, color); break;
+              case 5: element = besogo.svgBlock(x, y, color); break;
+            }
           }
+          else
+          { // Markup is a label
+            if (!stone) // If placing label on empty spot
+            {
+              element = makeBacker(x, y);
+              group.appendChild(element);
+            }
+            element = besogo.svgLabel(x, y, color, mark);
+          }
+          group.appendChild(element);
+          markupLayer[ fromXY(i, j) ] = element;
+        }
       }
+    }
 
-      svg.replaceChild(group, markupGroup); // Replace the markup group
-      markupGroup = group;
-  } // END function redrawMarkup
+    // Mark last move with plus if not already marked
+    if (lastMove && lastMove.x !== 0 && lastMove.y !== 0 &&
+        !markupLayer[fromXY(lastMove.x, lastMove.y)]) // Last move not marked
+    {
+      var color = checkVariants(variants, current, lastMove.x, lastMove.y) ? besogo.PURP : besogo.BLUE;
+      var element = besogo.svgPlus(svgPos(lastMove.x), svgPos(lastMove.y), color);
+      group.appendChild(element);
+      markupLayer[fromXY(lastMove.x, lastMove.y)] = element;
+    }
+
+    svg.replaceChild(group, markupGroup); // Replace the markup group
+    markupGroup = group;
+  }
 
   function redrawNextMoves(current)
   {

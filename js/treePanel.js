@@ -147,27 +147,31 @@ besogo.makeTreePanel = function(container, editor) {
         return path;
     } // END function recursiveTreeBuild
 
-    function makeNodeIcon(node, x, y) { // Makes a node icon for the tree
+    function makeNodeIcon(node, x, y) // Makes a node icon for the tree
+    {
         var element,
             color;
 
-        switch(node.getType()){
-            case 'move': // Move node
-                color = node.move.color;
-                element = besogo.svgEl("g");
-                element.appendChild( besogo.svgStone(svgPos(x), svgPos(y), color) );
-                color = (color === -1) ? "white" : "black";
-                element.appendChild( besogo.svgLabel(svgPos(x), svgPos(y), color,
-                    '' + node.moveNumber) );
-                element.appendChild(besogo.svgCircle(svgPos(x), svgPos(y), node.getCorrectColor(), 50))
-                break;
-            case 'setup': // Setup node
-                element = besogo.svgEl("g");
-                element.appendChild(besogo.svgStone(svgPos(x), svgPos(y))); // Grey stone
-                element.appendChild(besogo.svgPlus(svgPos(x), svgPos(y), besogo.RED));
-                break;
-            default: // Empty node
-                element = besogo.svgStone(svgPos(x), svgPos(y)); // Grey stone
+        switch(node.getType())
+        {
+          case 'move': // Move node
+            color = node.move.color;
+            element = besogo.svgEl("g");
+            element.appendChild( besogo.svgStone(svgPos(x), svgPos(y), color) );
+            color = (color === -1) ? "white" : "black";
+            if (node.virtualChildren.length)
+              element.appendChild(besogo.svgPlus(svgPos(x), svgPos(y), color));
+            else
+              element.appendChild( besogo.svgLabel(svgPos(x), svgPos(y), color, '' + node.moveNumber) );
+            element.appendChild(besogo.svgCircle(svgPos(x), svgPos(y), node.getCorrectColor(), 50))
+            break;
+          case 'setup': // Setup node
+            element = besogo.svgEl("g");
+            element.appendChild(besogo.svgStone(svgPos(x), svgPos(y))); // Grey stone
+            element.appendChild(besogo.svgPlus(svgPos(x), svgPos(y), besogo.RED));
+            break;
+          default: // Empty node
+            element = besogo.svgStone(svgPos(x), svgPos(y)); // Grey stone
         }
         node.navTreeIcon = element; // Save icon reference in game state tree
         node.navTreeX = x; // Save position of the icon

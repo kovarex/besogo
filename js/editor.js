@@ -31,7 +31,8 @@ besogo.makeEditor = function(sizeX, sizeY)
 
         // Variant style: even/odd - children/siblings, <2 - show auto markup for variants
         variantStyle = 0, // 0-3, 0 is default
-        edited = false;
+        edited = false,
+        shift = false;
 
     return {
       addListener: addListener,
@@ -62,7 +63,9 @@ besogo.makeEditor = function(sizeX, sizeY)
       loadRoot: loadRoot, // Loads new game state
       wasEdited: wasEdited,
       resetEdited: resetEdited,
-      notifyListeners: notifyListeners
+      notifyListeners: notifyListeners,
+      setShift: setShift,
+      isShift: isShift
     };
 
     // Returns the active tool
@@ -490,14 +493,14 @@ besogo.makeEditor = function(sizeX, sizeY)
     // Sets the markup at the given location and place
     function setMarkup(i, j, mark)
     {
-      if (mark === current.getMarkup(i, j)) 
+      if (mark === current.getMarkup(i, j))
         if (mark !== 0) // Compare mark to current
           mark = 0; // Same as current indicates removal desired
         else // Mark and current are both empty
           return; // No change if attempting to set empty to empty
 
       if (current.addMarkup(i, j, mark)) // Try to add the markup
-      { 
+      {
         var temp; // For label incrementing
         if (typeof mark === 'string')
         { // If markup is a label, increment the label
@@ -559,5 +562,15 @@ besogo.makeEditor = function(sizeX, sizeY)
     function resetEdited()
     {
       edited = false;
+    }
+
+    function setShift(value)
+    {
+      shift = value;
+    }
+
+    function isShift()
+    {
+      return shift;
     }
 };

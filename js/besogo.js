@@ -5,6 +5,7 @@ besogo.VERSION = '0.0.2-alpha';
 
 besogo.create = function(container, options) {
     var editor, // Core editor object
+        boardDisplay,
         resizer, // Auto-resizing function
         boardDiv, // Board display container
         panelsDiv, // Parent container of panel divs
@@ -26,86 +27,91 @@ besogo.create = function(container, options) {
     options.size = besogo.parseSize(options.size || 19);
     options.coord = options.coord || 'none';
     options.tool = options.tool || 'auto';
-    if (options.panels === '') {
-        options.panels = [];
-    }
+    if (options.panels === '')
+      options.panels = [];
     options.panels = options.panels || 'control+names+comment+tool+tree+file';
-    if (typeof options.panels === 'string') {
-        options.panels = options.panels.split('+');
-    }
+    if (typeof options.panels === 'string')
+      options.panels = options.panels.split('+');
     options.path = options.path || '';
-    if (options.shadows === undefined) {
-        options.shadows = 'auto';
-    } else if (options.shadows === 'off') {
-        options.shadows = false;
-    }
+    if (options.shadows === undefined)
+      options.shadows = 'auto';
+    else if (options.shadows === 'off')
+      options.shadows = false;
 
     // Make the core editor object
     editor = besogo.makeEditor(options.size.x, options.size.y);
     container.besogoEditor = editor;
     editor.setTool(options.tool);
     editor.setCoordStyle(options.coord);
-    if (options.realstones) { // Using realistic stones
-        editor.REAL_STONES = true;
-        editor.SHADOWS = options.shadows;
-    } else { // SVG stones
-        editor.SHADOWS = (options.shadows && options.shadows !== 'auto');
+    if (options.realstones) // Using realistic stones
+    {
+      editor.REAL_STONES = true;
+      editor.SHADOWS = options.shadows;
     }
+    else // SVG stones
+      editor.SHADOWS = (options.shadows && options.shadows !== 'auto');
 
-    if (!options.nokeys) { // Add keypress handler unless nokeys option is truthy
-        addKeypressHandler(container, editor);
-    }
 
-    if (options.sgf) { // Load SGF file from URL or SGF string
-        let validURL = false;
-        try {
-            new URL(options.sgf);
-            validURL = true;
-        } catch (e) {}
-
-        try {
-            if (validURL) {
-                fetchParseLoad(options.sgf, editor, options.path);
-            } else {
-                parseAndLoad(options.sgf, editor);
-                navigatePath(editor, options.path);
-            }
-        } catch(e) {
-            console.error(e);
-            // Silently fail on network error
+    if (options.sgf) // Load SGF file from URL or SGF string
+    {
+      let validURL = false;
+      try
+      {
+        new URL(options.sgf);
+        validURL = true;
+      } catch (e) {}
+      try
+      {
+        if (validURL)
+          fetchParseLoad(options.sgf, editor, options.path);
+        else
+        {
+          parseAndLoad(options.sgf, editor);
+          navigatePath(editor, options.path);
         }
-    } else if (insideText.match(/\s*\(\s*;/)) { // Text content looks like an SGF file
-        parseAndLoad(insideText, editor);
-        navigatePath(editor, options.path); // Navigate editor along path
+      }
+      catch(e)
+      {
+          console.error(e);
+          // Silently fail on network error
+      }
+    }
+    else if (insideText.match(/\s*\(\s*;/)) // Text content looks like an SGF file
+    {
+      parseAndLoad(insideText, editor);
+      navigatePath(editor, options.path); // Navigate editor along path
     }
 
-    if (typeof options.variants === 'number' || typeof options.variants === 'string') {
-        editor.setVariantStyle(+options.variants); // Converts to number
-    }
+    if (typeof options.variants === 'number' || typeof options.variants === 'string')
+      editor.setVariantStyle(+options.variants); // Converts to number
 
-    while (container.firstChild) { // Remove all children of container
-        container.removeChild(container.firstChild);
-    }
+    while (container.firstChild) // Remove all children of container
+      container.removeChild(container.firstChild);
 
     boardDiv = makeDiv('besogo-board'); // Create div for board display
-    besogo.makeBoardDisplay(boardDiv, editor); // Create board display
+    boardDisplay = besogo.makeBoardDisplay(boardDiv, editor); // Create board display
 
-    if (!options.nowheel) { // Add mousewheel handler unless nowheel option is truthy
-        addWheelHandler(boardDiv, editor);
-    }
+    if (!options.nokeys) // Add keypress handler unless nokeys option is truthy
+      addKeypressHandler(container, editor, boardDisplay);
 
-    if (options.panels.length > 0) { // Only create if there are panels to add
-        panelsDiv = makeDiv('besogo-panels');
-        for (i = 0; i < options.panels.length; i++) {
-            panelName = options.panels[i];
-            if (makers[panelName]) { // Only add if creator function exists
-                makers[panelName](makeDiv('besogo-' + panelName, panelsDiv), editor);
-            }
-        }
-        if (!panelsDiv.firstChild) { // If no panels were added
-            container.removeChild(panelsDiv); // Remove the panels div
-            panelsDiv = false; // Flags panels div as removed
-        }
+    if (!options.nowheel)
+    // Add mousewheel handler unless nowheel option is truthy
+      addWheelHandler(boardDiv, editor);
+
+    if (options.panels.length > 0) // Only create if there are panels to add
+    {
+      panelsDiv = makeDiv('besogo-panels');
+      for (i = 0; i < options.panels.length; i++)
+      {
+        panelName = options.panels[i];
+        if (makers[panelName]) // Only add if creator function exists
+          makers[panelName](makeDiv('besogo-' + panelName, panelsDiv), editor);
+      }
+      if (!panelsDiv.firstChild) // If no panels were added
+      {
+        container.removeChild(panelsDiv); // Remove the panels div
+        panelsDiv = false; // Flags panels div as removed
+      }
     }
 
     options.resize = options.resize || 'auto';
@@ -306,49 +312,52 @@ besogo.autoInit = function()
 };
 
 // Sets up keypress handling
-function addKeypressHandler(container, editor)
+function addKeypressHandler(container, editor, boardDisplay)
 {
   if (!container.getAttribute('tabindex'))
     container.setAttribute('tabindex', '0'); // Set tabindex to allow div focusing
 
   container.addEventListener('keydown', function(evt)
+  {
+    evt = evt || window.event;
+    switch (evt.keyCode)
     {
-      evt = evt || window.event;
-      switch (evt.keyCode)
-      {
-        case 33: // page up
-          editor.prevNode(10);
-          break;
-        case 34: // page down
-          editor.nextNode(10);
-          break;
-        case 35: // end
-          editor.nextNode(-1);
-          break;
-        case 36: // home
-          editor.prevNode(-1);
-          break;
-        case 37: // left
-          if (evt.shiftKey)
-            editor.prevBranchPoint();
-          else
-            editor.prevNode(1);
-          break;
-        case 38: // up
-          editor.nextSibling(-1);
-          break;
-        case 39: // right
-          editor.nextNode(1);
-          break;
-        case 40: // down
-          editor.nextSibling(1);
-          break;
-        case 46: // delete
-          editor.cutCurrent();
-          break;
-      }
-      if (evt.keyCode >= 33 && evt.keyCode <= 40)
-        evt.preventDefault(); // Suppress page nav controls
+      case 33: editor.prevNode(10); break; // page up
+      case 34: editor.nextNode(10); break; // page down
+      case 35: editor.nextNode(-1); break; // end
+      case 36: editor.prevNode(-1); break; // home
+      case 37: // left
+        if (evt.shiftKey)
+          editor.prevBranchPoint();
+        else
+          editor.prevNode(1);
+        break;
+      case 38: editor.nextSibling(-1); break; // up
+      case 39: editor.nextNode(1); break; // right
+      case 40: editor.nextSibling(1); break; // down
+      case 46: editor.cutCurrent(); break; // delete
+      case 16:
+        if (!editor.isShift())
+        {
+          editor.setShift(true); // shift
+          boardDisplay.redrawHover(editor.getCurrent());
+        }
+        break;
+    }
+    if (evt.keyCode >= 33 && evt.keyCode <= 40)
+      evt.preventDefault(); // Suppress page nav controls
+  });
+
+  container.addEventListener('keyup', function(evt)
+  {
+    evt = evt || window.event;
+    switch (evt.keyCode)
+    {
+      case 16:
+        editor.setShift(false);
+        boardDisplay.redrawHover(editor.getCurrent());
+        break; // shift
+    }
   });
 }
 
@@ -360,8 +369,8 @@ function addWheelHandler(boardDiv, editor)
     evt = evt || window.event;
     if (evt.deltaY > 0)
     {
-        editor.nextNode(1);
-        evt.preventDefault();
+      editor.nextNode(1);
+      evt.preventDefault();
     }
     else if (evt.deltaY < 0)
     {

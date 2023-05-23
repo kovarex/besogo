@@ -420,6 +420,8 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     root.samePositionAs = function(other)
     {
+      if (this.nextIsBlack() != other.nextIsBlack())
+        return false;
       return compareAssociativeArrays(this.board, other.board);
     }
 

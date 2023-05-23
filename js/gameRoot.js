@@ -29,7 +29,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     }
     initNode(root, null); // Initialize root node with null parent
     root.relevantMoves = [];
-    root.hashTable = [];
+    root.nodeHashTable = besogo.makeNodeHashTable();
 
     // Plays a move, returns true if successful
     // Set allow to truthy to allow overwrite, suicide and ko
@@ -293,11 +293,20 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       let i = this.children.indexOf(child);
       if (i == -1)
         return false;
-
-      for (let j = 0; j < child.virtualParents.length; ++j)
-        child.virtualParents[j].removeVirtualChild(child);
       this.children.splice(i, 1);
       return true;
+    };
+    
+    root.destroy = function(root = this.getRoot())
+    {
+      for (let i = 0; i < this.children.length; ++i)
+        this.children[i].destroy();
+      this.children = [];
+      for (let i = 0; i < this.virtualParents.length; ++i)
+        this.virtualParents[i].removeVirtualChild(child);
+      this.virtualParents = [];
+      root.nodeHashTable.erase(this);
+      this.parent.removeChild(this);
     };
 
     root.removeVirtualChild = function(child)
@@ -428,18 +437,6 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       while (i.parent)
         i = i.parent;
       return i;
-    }
-
-    root.getSameNode = function(root)
-    {
-      var hash = this.getHash();
-      var hashPoint = root.hashTable[hash];
-      if (!hashPoint)
-        return null;
-      for (let i = 0; i < hashPoint.length; ++i)
-        if (this.samePositionAs(hashPoint[i]))
-          return hashPoint[i];
-      return null;
     }
 
     root.registerInVirtualMoves = function()

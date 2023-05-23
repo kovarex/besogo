@@ -299,7 +299,7 @@ besogo.makeEditor = function(sizeX, sizeY)
         return; // Tree editing disabled in navOnly mode
       if (parent)
       {
-        parent.removeChild(current);
+        current.destroy();
         current = parent;
         besogo.updateCorrectValues(current.getRoot());
         // Notify navigation and tree edited

@@ -34,12 +34,7 @@ besogo.addRelevantMoves = function(root, node)
 besogo.addVirtualChildren = function(root, node, addHash = true)
 {
   if (addHash)
-  {
-    var hash = node.getHash();
-    if (!root.hashTable[hash])
-      root.hashTable[hash] = []
-    root.hashTable[hash].push(node)
-  }
+    root.nodeHashTable.push(node);
 
   var sizeX = root.getSize().x;
   var sizeY = root.getSize().y;
@@ -57,7 +52,7 @@ besogo.addVirtualChildren = function(root, node, addHash = true)
         continue;
       }
 
-      var sameNode = testChild.getSameNode(root);
+      var sameNode = root.nodeHashTable.getSameNode(testChild);
       if (sameNode && sameNode.parent != node)
       {
         var redirect = [];
@@ -79,15 +74,11 @@ besogo.addVirtualChildren = function(root, node, addHash = true)
 
 besogo.pruneTree = function(root, node)
 {
-  var hash = node.getHash();
-  if (!root.hashTable[hash])
-    root.hashTable[hash] = []
-  root.hashTable[hash].push(node)
-
+  root.nodeHashTable.push(node);
   for (let i = 0; i < node.children.length;)
   {
     var child = node.children[i];
-    if (child.getSameNode(root))
+    if (root.nodeHashTable.getSameNode(child))
     {
       root.prunnedMoveCount += child.treeSize();
       node.removeChild(child);

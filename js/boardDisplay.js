@@ -1,6 +1,5 @@
 besogo.makeBoardDisplay = function(container, editor)
 {
-  'use strict';
   var CELL_SIZE = 88, // Including line width
       COORD_MARGIN = 75, // Margin for coordinate labels
       EXTRA_MARGIN = 6, // Extra margin on the edge of board
@@ -298,8 +297,7 @@ besogo.makeBoardDisplay = function(container, editor)
   {
     if (lastHoverPosition == null)
       return;
-    var element = hoverLayer[fromXY(lastHoverPosition.x, lastHoverPosition.y)];
-    if (element) // Make tool action visible on hover over
+    if (element = hoverLayer[fromXY(lastHoverPosition.x, lastHoverPosition.y)]) // Make tool action visible on hover over
       element.setAttribute('visibility', 'visible');
   }
 
@@ -308,8 +306,7 @@ besogo.makeBoardDisplay = function(container, editor)
     return function()
     {
       lastHoverPosition = null;
-      var element = hoverLayer[fromXY(i, j)];
-      if (element) // Make tool action invisible on hover off
+      if (element = hoverLayer[fromXY(i, j)]) // Make tool action invisible on hover off
         element.setAttribute('visibility', 'hidden');
     };
   }
@@ -538,8 +535,7 @@ besogo.makeBoardDisplay = function(container, editor)
           var x = svgPos(i);
           var y = svgPos(j);
           var stone = current.getStone(i, j);
-          var element = getHoverElement(current, x, y, stone);
-          if (element)
+          if (element = getHoverElement(current, x, y, stone))
           {
             element.setAttribute('visibility', 'hidden');
             group.appendChild(element);

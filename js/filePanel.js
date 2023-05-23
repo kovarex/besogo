@@ -35,7 +35,10 @@ besogo.makeFilePanel = function(container, editor) {
     {
       var fileName = prompt('Save file as', 'export');
       if (fileName) // Canceled or empty string does nothing
+      {
         saveFile(fileName + ".sgf", besogo.composeSgf(editor));
+        editor.resetEdited();
+      }
     };
     container.appendChild(element);
 
@@ -48,7 +51,10 @@ besogo.makeFilePanel = function(container, editor) {
     {
       var fileName = prompt('Save file as', 'export');
       if (fileName) // Canceled or empty string does nothing
+      {
         saveFile(fileName + ".sgf", besogo.composeSgf(editor, true));
+        editor.resetEdited();
+      }
     };
     container.appendChild(element);
 

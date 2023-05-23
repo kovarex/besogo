@@ -64,6 +64,7 @@ besogo.makeEditor = function(sizeX, sizeY) {
         getRoot: getRoot,
         loadRoot: loadRoot, // Loads new game state
         wasEdited: wasEdited,
+        resetEdited: resetEdited,
         notifyListeners: notifyListeners
     };
 
@@ -576,5 +577,10 @@ besogo.makeEditor = function(sizeX, sizeY) {
     function wasEdited()
     {
       return edited;
+    }
+
+    function resetEdited()
+    {
+      edited = false;
     }
 };

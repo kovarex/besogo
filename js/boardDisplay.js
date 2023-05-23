@@ -407,12 +407,15 @@ besogo.makeBoardDisplay = function(container, editor)
         !markupLayer[fromXY(lastMove.x, lastMove.y)]) // Last move not marked
     {
       var color = checkVariants(variants, current, lastMove.x, lastMove.y) ? besogo.PURP : besogo.BLUE;
-      var element = besogo.svgCircle(svgPos(lastMove.x),
-                                     svgPos(lastMove.y),
+      var moveToUse = lastMove;
+      if (current.cameFrom)
+        moveToUse = current.cameFrom.getMoveToGetToVirtualChild(current);
+      var element = besogo.svgCircle(svgPos(moveToUse.x),
+                                     svgPos(moveToUse.y),
                                      current.nextIsBlack() ? "black" : "white",
                                      20, 4);
       group.appendChild(element);
-      markupLayer[fromXY(lastMove.x, lastMove.y)] = element;
+      markupLayer[fromXY(moveToUse.x, moveToUse.y)] = element;
     }
 
     svg.replaceChild(group, markupGroup); // Replace the markup group

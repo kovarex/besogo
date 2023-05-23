@@ -324,6 +324,14 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       return false;
     };
 
+    root.getMoveToGetToVirtualChild = function(child)
+    {
+      for (let i = 0; i < this.virtualChildren.length; ++i)
+        if (this.virtualChildren[i].target == child)
+          return this.virtualChildren[i].move;
+      return null;
+    }
+
     // Raises child variation to a higher precedence
     root.promote = function(child) {
         var i = this.children.indexOf(child);

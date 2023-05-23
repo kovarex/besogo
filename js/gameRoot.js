@@ -145,34 +145,27 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     // Recursively builds a chain of pending captures starting from (x, y)
     // Stops and returns true if chain has liberties
-    function recursiveCapture(board, x, y, color, pending) {
-        var i; // Scratch iteration variable
+    function recursiveCapture(board, x, y, color, pending)
+    {
+      if (x < 1 || y < 1 || x > sizeX || y > sizeY)
+        return false; // Stop if out of bounds
+      if (board.getStone(x, y) === color)
+        return false; // Stop if other color found
+      if (!board.getStone(x, y))
+        return true; // Stop and signal that liberty was found
+      for (let i = 0; i < pending.length; i++)
+        if (pending[i].x === x && pending[i].y === y)
+          return false; // Stop if already in pending captures
 
-        if (x < 1 || y < 1 || x > sizeX || y > sizeY) {
-            return false; // Stop if out of bounds
-        }
-        if (board.getStone(x, y) === color) {
-            return false; // Stop if other color found
-        }
-        if (!board.getStone(x, y)) {
-            return true; // Stop and signal that liberty was found
-        }
-        for (i = 0; i < pending.length; i++) {
-            if (pending[i].x === x && pending[i].y === y) {
-                return false; // Stop if already in pending captures
-            }
-        }
+      pending.push({ x: x, y: y }); // Add new stone into chain of pending captures
 
-        pending.push({ x: x, y: y }); // Add new stone into chain of pending captures
-
-        // Recursively check for liberties and expand chain
-        if (recursiveCapture(board, x - 1, y, color, pending) ||
-            recursiveCapture(board, x + 1, y, color, pending) ||
-            recursiveCapture(board, x, y - 1, color, pending) ||
-            recursiveCapture(board, x, y + 1, color, pending)) {
-                return true; // Stop and signal liberty found in subchain
-        }
-        return false; // Otherwise, no liberties found
+      // Recursively check for liberties and expand chain
+      if (recursiveCapture(board, x - 1, y, color, pending) ||
+          recursiveCapture(board, x + 1, y, color, pending) ||
+          recursiveCapture(board, x, y - 1, color, pending) ||
+          recursiveCapture(board, x, y + 1, color, pending))
+        return true; // Stop and signal liberty found in subchain
+      return false; // Otherwise, no liberties found
     }
 
     // Get next to move
@@ -187,8 +180,9 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     root.nextIsBlack = function() { return this.nextMove() == BLACK; }
 
     // Places a setup stone, returns true if successful
-    root.placeSetup = function(x, y, color) {
-        var prevColor = (this.parent && this.parent.getStone(x, y)) || EMPTY;
+    root.placeSetup = function(x, y, color)
+    {
+        let prevColor = (this.parent && this.parent.getStone(x, y)) || EMPTY;
 
         if (x < 1 || y < 1 || x > sizeX || y > sizeY) {
             return false; // Do not allow out of bounds setup
@@ -204,62 +198,57 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     };
 
     // Adds markup, returns true if successful
-    root.addMarkup = function(x, y, mark) {
-        if (x < 1 || y < 1 || x > sizeX || y > sizeY) {
-            return false; // Do not allow out of bounds markup
-        }
-        if (this.getMarkup(x, y) === mark) { // Quit early if no change to make
-            return false;
-        }
-        this.markup[this.fromXY(x, y)] = mark;
-        return true;
+    root.addMarkup = function(x, y, mark)
+    {
+      if (x < 1 || y < 1 || x > sizeX || y > sizeY)
+        return false; // Do not allow out of bounds markup
+      if (this.getMarkup(x, y) === mark) // Quit early if no change to make
+        return false;
+      this.markup[this.fromXY(x, y)] = mark;
+      return true;
     };
 
     root.getStone = function(x, y) { return this.board[x + '-' + y] || EMPTY; };
     root.setStone = function(x, y, color) { this.board[x + '-' + y] = color; }
 
     // Gets the setup stone placed at (x, y), returns false if none
-    root.getSetup = function(x, y) {
-        if (!this.setupStones[this.fromXY(x, y)]) { // No setup stone placed
-            return false;
-        } else { // Determine net effect of setup stone
-            switch(this.getStone(x, y)) {
-                case EMPTY:
-                    return 'AE';
-                case BLACK:
-                    return 'AB';
-                case WHITE:
-                    return 'AW';
-            }
-        }
+    root.getSetup = function(x, y)
+    {
+        if (!this.setupStones[this.fromXY(x, y)]) // No setup stone placed
+          return false;
+        else // Determine net effect of setup stone
+          switch(this.getStone(x, y))
+          {
+            case EMPTY: return 'AE';
+            case BLACK: return 'AB';
+            case WHITE: return 'AW';
+          }
     };
 
     // Gets the markup at (x, y)
-    root.getMarkup = function(x, y) {
-        return this.markup[this.fromXY(x, y)] || EMPTY;
+    root.getMarkup = function(x, y)
+    {
+      return this.markup[this.fromXY(x, y)] || EMPTY;
     };
 
     // Determines the type of this node
-    root.getType = function() {
-        var i;
+    root.getType = function()
+    {
+      if (this.move) // Logged move implies move node
+        return 'move';
 
-        if (this.move) { // Logged move implies move node
-            return 'move';
-        }
+      for (let i = 0; i < this.setupStones.length; i++)
+        if (this.setupStones[i]) // Any setup stones implies setup node
+          return 'setup';
 
-        for (i = 0; i < this.setupStones.length; i++) {
-            if (this.setupStones[i]) { // Any setup stones implies setup node
-                return 'setup';
-            }
-        }
-
-        return 'empty'; // Otherwise, "empty" (neither move nor setup)
+      return 'empty'; // Otherwise, "empty" (neither move nor setup)
     };
 
-    root.getCorrectColor = function() {
-        if (this.correct)
-            return 'green';
-        return 'red';
+    root.getCorrectColor = function()
+    {
+      if (this.correct)
+        return 'green';
+      return 'red';
     };
 
     // Checks if this node can be modified by a 'type' action
@@ -276,16 +265,18 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     };
 
     // Gets siblings of this node
-    root.getSiblings = function() {
-        return (this.parent && this.parent.children) || [];
+    root.getSiblings = function()
+    {
+      return (this.parent && this.parent.children) || [];
     };
 
     // Makes a child node of this node, but does NOT add it to children
-    root.makeChild = function() {
-        var child = Object.create(this); // Child inherits properties
-        initNode(child, this); // Initialize other properties
+    root.makeChild = function()
+    {
+      var child = Object.create(this); // Child inherits properties
+      initNode(child, this); // Initialize other properties
 
-        return child;
+      return child;
     };
 
     // Adds a child to this node
@@ -299,15 +290,14 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     // Remove child node from this node, returning false if failed
     root.removeChild = function(child)
     {
-      var i = this.children.indexOf(child);
-      if (i !== -1)
-      {
-        for (let j = 0; j < child.virtualParents.length; ++j)
-          child.virtualParents[j].removeVirtualChild(child);
-        this.children.splice(i, 1);
-        return true;
-      }
-      return false;
+      let i = this.children.indexOf(child);
+      if (i == -1)
+        return false;
+
+      for (let j = 0; j < child.virtualParents.length; ++j)
+        child.virtualParents[j].removeVirtualChild(child);
+      this.children.splice(i, 1);
+      return true;
     };
 
     root.removeVirtualChild = function(child)
@@ -333,31 +323,33 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     }
 
     // Raises child variation to a higher precedence
-    root.promote = function(child) {
-        var i = this.children.indexOf(child);
-        if (i > 0) { // Child exists and not already first
-            this.children[i] = this.children[i - 1];
-            this.children[i - 1] = child;
-            return true;
-        }
-        return false;
+    root.promote = function(child)
+    {
+      var i = this.children.indexOf(child);
+      if (i > 0) // Child exists and not already first
+      {
+        this.children[i] = this.children[i - 1];
+        this.children[i - 1] = child;
+        return true;
+      }
+      return false;
     };
 
     // Drops child variation to a lower precedence
-    root.demote = function(child) {
-        var i = this.children.indexOf(child);
-        if (i !== -1 && i < this.children.length - 1) { // Child exists and not already last
-            this.children[i] = this.children[i + 1];
-            this.children[i + 1] = child;
-            return true;
-        }
-        return false;
+    root.demote = function(child)
+    {
+      var i = this.children.indexOf(child);
+      if (i !== -1 && i < this.children.length - 1) // Child exists and not already last
+      {
+        this.children[i] = this.children[i + 1];
+        this.children[i + 1] = child;
+        return true;
+      }
+      return false;
     };
 
     // Gets board size
-    root.getSize = function() {
-        return { x: sizeX, y: sizeY };
-    };
+    root.getSize = function() { return {x: sizeX, y: sizeY}; };
 
     // Convert (x, y) coordinates to linear index
     root.fromXY = function(x, y)
@@ -452,8 +444,8 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
 
     root.registerInVirtualMoves = function()
     {
-      var myRoot = this.getRoot();
-      var index = this.fromXY(this.move.x, this.move.y);
+      let myRoot = this.getRoot();
+      let index = this.fromXY(this.move.x, this.move.y);
       myRoot.relevantMoves[index] = true;
       besogo.addVirtualChildren(myRoot, this);
     }
@@ -467,6 +459,29 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       this.correctSource = value;
       besogo.updateCorrectValues(this.getRoot());
       editor.notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
+    }
+
+    root.checkTsumegoHeroCompatibility = function()
+    {
+      if (!this.nextIsBlack() &&
+          this.children.length == 0 &&
+          this.virtualChildren.length == 0 &&
+          !this.correctSource)
+        return {node: this, message: "Last black move not marked correct"};
+
+      for (let i = 0; i < this.children.length; ++i)
+      {
+        let result = this.children[i].checkTsumegoHeroCompatibility()
+        if (result)
+          return result;
+      }
+      for (let i = 0; i < this.virtualChildren.length; ++i)
+      {
+        let result = this.virtualChildren[i].target.checkTsumegoHeroCompatibility()
+        if (result)
+          return result;
+      }
+      return null;
     }
 
     return root;

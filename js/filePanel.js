@@ -49,6 +49,14 @@ besogo.makeFilePanel = function(container, editor) {
     element.title = 'Export SGF export with all virtual variations expanded';
     element.onclick = function()
     {
+      let checkResult = editor.getRoot().checkTsumegoHeroCompatibility()
+      if (checkResult)
+      {
+        editor.setCurrent(checkResult.node);
+        window.alert(checkResult.message);
+        return;
+      }
+
       var fileName = prompt('Save file as', 'export');
       if (fileName) // Canceled or empty string does nothing
       {

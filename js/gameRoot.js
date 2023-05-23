@@ -263,16 +263,16 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     };
 
     // Checks if this node can be modified by a 'type' action
-    root.isMutable = function(type) {
-        // Can only add a move to an empty node with no children
-        if (type === 'move' && this.getType() === 'empty' && this.children.length === 0) {
-            return true;
-        }
-        // Can only add setup stones to a non-move node with no children
-        if (type === 'setup' && this.getType() !== 'move' && this.children.length === 0) {
-            return true;
-        }
-        return false;
+    root.isMutable = function(type)
+    {
+      // Can only add a move to an empty node with no children
+      if (type === 'move' && this.getType() === 'empty' && this.children.length === 0)
+        return true;
+
+      // Can only add setup stones to a non-move node (children are allowed to be able to edit existing problem)
+      if (type === 'setup' && this.getType() !== 'move')
+        return true;
+      return false;
     };
 
     // Gets siblings of this node

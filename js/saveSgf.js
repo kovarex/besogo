@@ -22,7 +22,10 @@ besogo.composeSgf = function(editor, expand = false) {
       {
         for (i = 0; i < children.length; i++)
           string += '\n(' + composeNode(children[i], expand) + ')';
-        if (expand)
+
+        // Don't export alternative virtual white moves when normal moves are available
+        // This is mainly because tsumego-hero can't support it
+        if (expand && (tree.nextIsBlack() || tree.children.length == 0))
           for (i = 0; i < tree.virtualChildren.length; i++)
             if (tree.correct || !tree.virtualChildren[i].target.correct)
               string += '\n(' + composeNode(tree.virtualChildren[i].target, expand, tree.virtualChildren[i].move) + ')';

@@ -461,109 +461,82 @@ besogo.makeBoardDisplay = function(container, editor) {
         return false;
     }
 
+    function getHoverElement(current, x, y, stone)
+    {
+      var color = (stone === -1) ? "white" : "black"; // White on black
+      switch(editor.getTool())
+      {
+        case 'auto': return besogo.svgStone(x, y, current.nextMove());
+        case 'playB': return besogo.svgStone(x, y, -1);
+        case 'playW': return besogo.svgStone(x, y, 1);
+        case 'addB':
+          if (stone)
+            return besogo.svgCross(x, y, besogo.RED);
+          var element = besogo.svgEl('g');
+          element.appendChild(besogo.svgStone(x, y, -1));
+          element.appendChild(besogo.svgPlus(x, y, besogo.RED));
+          return element;
+        case 'addE': return stone ? besogo.svgCross(x, y, besogo.RED) : nullptr;
+        case 'clrMark': break; // Nothing
+        case 'circle': return besogo.svgCircle(x, y, color);
+        case 'square': return besogo.svgSquare(x, y, color);;
+        case 'triangle': return besogo.svgTriangle(x, y, color);
+        case 'cross': return besogo.svgCross(x, y, color);
+        case 'block': return besogo.svgBlock(x, y, color);
+        case 'label': return besogo.svgLabel(x, y, color, editor.getLabel());
+      }
+    }
+
     // Redraws the hover layer
-    function redrawHover(current) {
-        if (TOUCH_FLAG) {
-            return; // Do nothing for touch interfaces
+    function redrawHover(current)
+    {
+      if (TOUCH_FLAG)
+        return; // Do nothing for touch interfaces
+
+      var group = besogo.svgEl("g"), // Group holding hover layer elements
+          tool = editor.getTool(),
+          children;
+
+      hoverLayer = []; // Clear the references to the old layer
+      group.setAttribute('opacity', '0.35');
+
+      if (tool === 'navOnly')
+      { // Render navOnly hover by iterating over children
+        children = current.children;
+        for (let i = 0; i < children.length; i++)
+        {
+          var stone = children[i].move;
+          if (stone && stone.x !== 0) // Child node is move and not a pass
+          {
+            var x = svgPos(stone.x);
+            var y = svgPos(stone.y);
+            var element = besogo.svgStone(x, y, stone.color);
+            element.setAttribute('visibility', 'hidden');
+            group.appendChild(element);
+            hoverLayer[ fromXY(stone.x, stone.y) ] = element;
+          }
+        }
+      }
+      else // Render hover for other tools by iterating over grid
+        for (let i = 1; i <= sizeX; i++) {
+          for (let j = 1; j <= sizeY; j++)
+          {
+            var x = svgPos(i);
+            var y = svgPos(j);
+            var stone = current.getStone(i, j);
+            var element = getHoverElement(current, x, y, stone);
+            if (element)
+            {
+              element.setAttribute('visibility', 'hidden');
+              group.appendChild(element);
+              hoverLayer[ fromXY(i, j) ] = element;
+            }
+          }
         }
 
-        var element, i, j, x, y, // Scratch iteration variables
-            group = besogo.svgEl("g"), // Group holding hover layer elements
-            tool = editor.getTool(),
-            children,
-            stone, // Scratch stone state {0, -1, 1} or move
-            color; // Scratch color string
-
-        hoverLayer = []; // Clear the references to the old layer
-        group.setAttribute('opacity', '0.35');
-
-        if (tool === 'navOnly') { // Render navOnly hover by iterating over children
-            children = current.children;
-            for (i = 0; i < children.length; i++) {
-                stone = children[i].move;
-                if (stone && stone.x !== 0) { // Child node is move and not a pass
-                    x = svgPos(stone.x);
-                    y = svgPos(stone.y);
-                    element = besogo.svgStone(x, y, stone.color);
-                    element.setAttribute('visibility', 'hidden');
-                    group.appendChild(element);
-                    hoverLayer[ fromXY(stone.x, stone.y) ] = element;
-                }
-            }
-        } else { // Render hover for other tools by iterating over grid
-            for (i = 1; i <= sizeX; i++) {
-                for (j = 1; j <= sizeY; j++) {
-                    element = null;
-                    x = svgPos(i);
-                    y = svgPos(j);
-                    stone = current.getStone(i, j);
-                    color = (stone === -1) ? "white" : "black"; // White on black
-                    switch(tool) {
-                        case 'auto':
-                            element = besogo.svgStone(x, y, current.nextMove());
-                            break;
-                        case 'playB':
-                            element = besogo.svgStone(x, y, -1);
-                            break;
-                        case 'playW':
-                            element = besogo.svgStone(x, y, 1);
-                            break;
-                        case 'addB':
-                            if (stone === -1) {
-                                element = besogo.svgCross(x, y, besogo.RED);
-                            } else {
-                                element = besogo.svgEl('g');
-                                element.appendChild(besogo.svgStone(x, y, -1));
-                                element.appendChild(besogo.svgPlus(x, y, besogo.RED));
-                            }
-                            break;
-                        case 'addW':
-                            if (stone === 1) {
-                                element = besogo.svgCross(x, y, besogo.RED);
-                            } else {
-                                element = besogo.svgEl('g');
-                                element.appendChild(besogo.svgStone(x, y, 1));
-                                element.appendChild(besogo.svgPlus(x, y, besogo.RED));
-                            }
-                            break;
-                        case 'addE':
-                            if (stone) {
-                                element = besogo.svgCross(x, y, besogo.RED);
-                            }
-                            break;
-                        case 'clrMark':
-                            break; // Nothing
-                        case 'circle':
-                            element = besogo.svgCircle(x, y, color);
-                            break;
-                        case 'square':
-                            element = besogo.svgSquare(x, y, color);
-                            break;
-                        case 'triangle':
-                            element = besogo.svgTriangle(x, y, color);
-                            break;
-                        case 'cross':
-                            element = besogo.svgCross(x, y, color);
-                            break;
-                        case 'block':
-                            element = besogo.svgBlock(x, y, color);
-                            break;
-                        case 'label':
-                            element = besogo.svgLabel(x, y, color, editor.getLabel());
-                            break;
-                    } // END switch (tool)
-                    if (element) {
-                        element.setAttribute('visibility', 'hidden');
-                        group.appendChild(element);
-                        hoverLayer[ fromXY(i, j) ] = element;
-                    }
-                } // END for j
-            } // END for i
-        } // END else
-
-        svg.replaceChild(group, hoverGroup); // Replace the hover layer group
-        hoverGroup = group;
-    } // END function redrawHover
+      svg.replaceChild(group, hoverGroup); // Replace the hover layer group
+      hoverGroup = group;
+    }
 
     function svgPos(x) {  // Converts (x, y) coordinates to SVG position
         return BOARD_MARGIN + CELL_SIZE/2 + (x-1) * CELL_SIZE;

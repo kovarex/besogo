@@ -76,42 +76,45 @@ besogo.realStone = function(x, y, color, index) {
 };
 
 // Makes a stone element
-besogo.svgStone = function(x, y, color) {
-    var className = "besogo-svg-greyStone"; // Grey stone by default
+besogo.svgStone = function(x, y, color, radius = 42)
+{
+  var className = "besogo-svg-greyStone"; // Grey stone by default
 
-    if (color === -1) { // Black stone
-        className = "besogo-svg-blackStone";
-    } else if (color === 1) { // White stone
-        className = "besogo-svg-whiteStone";
-    }
+  if (color === -1) // Black stone
+    className = "besogo-svg-blackStone";
+  else if (color === 1) // White stone
+    className = "besogo-svg-whiteStone";
 
-    return besogo.svgEl("circle", {
-        cx: x,
-        cy: y,
-        r: 42,
-        'class': className
-    });
+  return besogo.svgEl("circle",
+  {
+      cx: x,
+      cy: y,
+      r: radius,
+      'class': className
+  });
 };
 
 // Makes a circle at (x, y)
-besogo.svgCircle = function(x, y, color, radius = 27) {
-    return besogo.svgEl("circle", {
-        cx: x,
-        cy: y,
-        r: radius,
-        stroke: color,
-        "stroke-width": 8,
-        fill: "none"
-    });
+besogo.svgCircle = function(x, y, color, radius = 27)
+{
+  return besogo.svgEl("circle", {
+      cx: x,
+      cy: y,
+      r: radius,
+      stroke: color,
+      "stroke-width": 8,
+      fill: "none"
+  });
 };
 
-besogo.svgFilledCircle = function(x, y, color, radius = 27) {
-    return besogo.svgEl("circle", {
-        cx: x,
-        cy: y,
-        r: radius,
-        fill: color
-    });
+besogo.svgFilledCircle = function(x, y, color, radius = 27)
+{
+  return besogo.svgEl("circle", {
+      cx: x,
+      cy: y,
+      r: radius,
+      fill: color
+  });
 };
 
 // Makes a square at (x, y)

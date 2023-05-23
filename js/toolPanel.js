@@ -11,7 +11,7 @@ besogo.makeToolPanel = function(container, editor)
       'shift+click to jump to move'); // Auto-play/nav tool button
   svg.appendChild(makeYinYang(0, 0));
 
-  svg = makeButtonSVG('addB', 'Set black\nshift+click addWhite\n ctrl+click to play'); // Add black button
+  svg = makeButtonSVG('addB', 'Set black\nshift+click addWhite\nctrl+click to play'); // Add black button
   element = besogo.svgEl('g');
   element.appendChild(besogo.svgStone(-15, -15, -1, 15)); // Black stone
   element.appendChild(besogo.svgStone(15, -15, 1, 15)); // White stone

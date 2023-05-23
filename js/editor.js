@@ -13,8 +13,6 @@ besogo.makeEditor = function(sizeX, sizeY)
             'playB', // play black stone
             'playW', // play white stone
             'addB', // setup black stone
-            'addW', // setup white stone
-            'addE', // setup empty stone
             'clrMark', // remove markup
             'circle', // circle markup
             'square', // square markup
@@ -351,9 +349,6 @@ besogo.makeEditor = function(sizeX, sizeY)
             placeSetup(i, j, 1); // Set white
           else
             placeSetup(i, j, -1); // Set black
-          break;
-        case 'addE':
-          placeSetup(i, j, 0);
           break;
         case 'clrMark':
           setMarkup(i, j, 0);

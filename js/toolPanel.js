@@ -19,12 +19,6 @@ besogo.makeToolPanel = function(container, editor)
   element.appendChild(besogo.svgStone(15, 15, -1, 15)); // Black stone
   svg.appendChild(element);
 
-  svg = makeButtonSVG('addE', 'Set empty point'); // Add empty button
-  element = besogo.svgEl('g');
-  element.appendChild(besogo.svgStone(0, 0)); // Grey stone
-  element.appendChild(besogo.svgCross(0, 0, besogo.RED)); // Red cross
-  svg.appendChild(element);
-
   svg = makeButtonSVG('circle', 'Circle'); // Circle markup button
   svg.appendChild(besogo.svgCircle(0, 0, 'black'));
 

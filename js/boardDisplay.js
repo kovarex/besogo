@@ -476,7 +476,6 @@ besogo.makeBoardDisplay = function(container, editor) {
           element.appendChild(besogo.svgStone(x, y, -1));
           element.appendChild(besogo.svgPlus(x, y, besogo.RED));
           return element;
-        case 'addE': return stone ? besogo.svgCross(x, y, besogo.RED) : null;
         case 'clrMark': break; // Nothing
         case 'circle': return besogo.svgCircle(x, y, color);
         case 'square': return besogo.svgSquare(x, y, color);;

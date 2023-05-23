@@ -38,8 +38,8 @@ besogo.makeCommentPanel = function(container, editor)
           CP: 'Copyright'
       };
 
-  container.appendChild(makeInfoButton());
-  container.appendChild(makeInfoEditButton());
+  //container.appendChild(makeInfoButton());
+  //container.appendChild(makeInfoEditButton());
   container.appendChild(makeCommentButton());
   var correctButton = makeCorrectVariantButton();
   container.appendChild(correctButton);

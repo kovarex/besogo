@@ -515,21 +515,19 @@ besogo.makeBoardDisplay = function(container, editor) {
         }
       }
       else // Render hover for other tools by iterating over grid
-        for (let i = 1; i <= sizeX; i++) {
+        for (let i = 1; i <= sizeX; i++)
           for (let j = 1; j <= sizeY; j++)
           {
             var x = svgPos(i);
             var y = svgPos(j);
             var stone = current.getStone(i, j);
-            var element = getHoverElement(current, x, y, stone);
-            if (element)
+            if (var element = getHoverElement(current, x, y, stone))
             {
               element.setAttribute('visibility', 'hidden');
               group.appendChild(element);
               hoverLayer[ fromXY(i, j) ] = element;
             }
           }
-        }
 
       svg.replaceChild(group, hoverGroup); // Replace the hover layer group
       hoverGroup = group;

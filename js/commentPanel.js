@@ -60,6 +60,14 @@ besogo.makeCommentPanel = function(container, editor)
   update({ navChange: true, gameInfo: editor.getGameInfo() });
   gameInfoEdit.style.display = 'none'; // Hide game info editting table initially
 
+  function preventFocus(event)
+  {
+    if (event.relatedTarget) // Revert focus back to previous blurring element
+      event.relatedTarget.focus();
+    else
+      this.blur(); // No previous focus target, blur instead
+  }
+
   function update(msg)
   {
     var temp; // Scratch for strings
@@ -236,6 +244,7 @@ besogo.makeCommentPanel = function(container, editor)
     button.type = 'button';
     button.value = 'Incorrect';
     button.title = 'Change incorrect state';
+    button.addEventListener('focus', preventFocus);
 
     button.onclick = function()
     {

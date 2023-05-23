@@ -303,7 +303,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         this.children[i].destroy();
       this.children = [];
       for (let i = 0; i < this.virtualParents.length; ++i)
-        this.virtualParents[i].removeVirtualChild(child);
+        this.virtualParents[i].removeVirtualChild(this);
       this.virtualParents = [];
       root.nodeHashTable.erase(this);
       this.parent.removeChild(this);

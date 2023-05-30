@@ -60,6 +60,7 @@ besogo.addVirtualChildren = function(root, node, addHash = true)
         redirect.move = [];
         redirect.move.x = move.x;
         redirect.move.y = move.y;
+        redirect.move.captures = testChild.move.captures;
         redirect.move.color = node.nextMove();
         node.virtualChildren.push(redirect);
         redirect.target.virtualParents.push(node);

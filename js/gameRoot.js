@@ -127,7 +127,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       this.lastMove = color; // Store color of last move
       this.moveNumber++; // Increment move number
       return true;
-    }; // END func root.playMove
+    };
 
     // Check for and perform capture of opposite color chain at (x, y)
     function captureStones(board, x, y, color, captures)
@@ -296,7 +296,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       this.children.splice(i, 1);
       return true;
     };
-    
+
     root.destroy = function(root = this.getRoot())
     {
       for (let i = 0; i < this.children.length; ++i)
@@ -418,11 +418,83 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
        return true;
     }
 
+    root.getForbiddenMoveBecauseOfKo = function()
+    {
+      if (!this.move)
+        return null;
+      if (this.move.captures != 1)
+        return null;
+      let whiteSurrounds = 0;
+      let emptySpace = null;
+      if (this.move.x > 1)
+      {
+        let stone = this.getStone(this.move.x - 1, this.move.y);
+        if (stone == -this.move.color)
+          ++whiteSurrounds;
+        else if (stone == 0)
+          emptySpace = {x: this.move.x - 1, y: this.move.y};
+      }
+      else
+        ++whiteSurrounds;
+
+      if (this.move.x < sizeX)
+      {
+        let stone = this.getStone(this.move.x + 1, this.move.y);
+        if (stone == -this.move.color)
+          ++whiteSurrounds;
+        else if (stone == 0)
+          emptySpace = {x: this.move.x + 1, y: this.move.y};
+      }
+      else
+        ++whiteSurrounds;
+
+      if (this.move.y > 1)
+      {
+        let stone = this.getStone(this.move.x, this.move.y - 1);
+        if (stone == -this.move.color)
+          ++whiteSurrounds;
+        else if (stone == 0)
+          emptySpace = {x: this.move.x, y: this.move.y - 1};
+      }
+      else
+        ++whiteSurrounds;
+
+      if (this.move.y < sizeY)
+      {
+        let stone = this.getStone(this.move.x, this.move.y + 1);
+        if (stone == -this.move.color)
+          ++whiteSurrounds;
+        else if (stone == 0)
+          emptySpace = {x: this.move.x, y: this.move.y + 1};
+      }
+      else
+        ++whiteSurrounds;
+
+      if (whiteSurrounds != 3)
+        return null;
+      return emptySpace;
+    }
+
+    root.hasSameKoStateAs = function(other)
+    {
+      let thisKo = this.getForbiddenMoveBecauseOfKo(this.move);
+      let otherKo = other.getForbiddenMoveBecauseOfKo(other.move);
+      if (!thisKo && !otherKo)
+        return true;
+      if (!thisKo && otherKo)
+        return false;
+      if (thisKo && !otherKo)
+        return false;
+      return thisKo.x == otherKo.x || thisKo.y == otherKo.y;
+    }
+
     root.samePositionAs = function(other)
     {
       if (this.nextIsBlack() != other.nextIsBlack())
         return false;
-      return compareAssociativeArrays(this.board, other.board);
+      if (!compareAssociativeArrays(this.board, other.board))
+        return false;
+      return this.hasSameKoStateAs(other);
     }
 
     root.treeSize = function()

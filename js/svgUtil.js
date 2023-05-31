@@ -118,16 +118,18 @@ besogo.svgFilledCircle = function(x, y, color, radius = 27)
 };
 
 // Makes a square at (x, y)
-besogo.svgSquare = function(x, y, color) {
-    return besogo.svgEl("rect", {
+besogo.svgSquare = function(x, y, color, strokeWidth = 8)
+{
+    return besogo.svgEl("rect",
+      {
         x: (x - 23),
         y: (y - 23),
         width: 46,
         height: 46,
         stroke: color,
-        "stroke-width": 8,
+        "stroke-width": strokeWidth,
         fill: "none"
-    });
+      });
 };
 
 // Makes an equilateral triangle at (x, y)

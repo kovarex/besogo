@@ -34,7 +34,8 @@ besogo.makeBoardDisplay = function(container, editor)
     };
 
   // Function for setting the flag for touch interfaces
-  function setTouchFlag () {
+  function setTouchFlag ()
+  {
       TOUCH_FLAG = true; // Set flag to prevent needless function calls
       hoverLayer = []; // Drop hover layer references, kills events
       svg.removeChild(hoverGroup); // Remove hover group from SVG
@@ -43,7 +44,8 @@ besogo.makeBoardDisplay = function(container, editor)
   }
 
   // Initializes the SVG and draws the board
-  function initializeBoard(coord) {
+  function initializeBoard(coord)
+  {
       drawBoard(coord); // Initialize the SVG element and draw the board
 
       stoneGroup = besogo.svgEl("g");
@@ -347,6 +349,9 @@ besogo.makeBoardDisplay = function(container, editor)
           }
         }
       }
+    let koPosition = current.getForbiddenMoveBecauseOfKo();
+    if (koPosition)
+      group.appendChild(besogo.svgSquare(svgPos(koPosition.x), svgPos(koPosition.y), "black", 2));
 
     svg.replaceChild(group, stoneGroup); // Replace the stone group
     stoneGroup = group;

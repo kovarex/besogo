@@ -297,14 +297,28 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       return true;
     };
 
+    root.removeVirtualParent = function(virtualParent)
+    {
+      let i = this.virtualParents.indexOf(virtualParent);
+      if (i == -1)
+        return false;
+      this.virtualParents.splice(i, 1);
+      return true;
+    };
+
     root.destroy = function(root = this.getRoot())
     {
       for (let i = 0; i < this.children.length; ++i)
         this.children[i].destroy();
       this.children = [];
+
       for (let i = 0; i < this.virtualParents.length; ++i)
         this.virtualParents[i].removeVirtualChild(this);
       this.virtualParents = [];
+
+      for (let i = 0; i < this.virtualChildren.length; ++i)
+        this.virtualChildren[i].target.removeVirtualParent(this);
+      this.virtualChildren = [];
       root.nodeHashTable.erase(this);
       this.parent.removeChild(this);
     };

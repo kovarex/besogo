@@ -306,7 +306,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
       return true;
     };
 
-    root.destroy = function(root = this.getRoot())
+    root.destroy = function(root = this.getRoot(), removeFromParent = true)
     {
       for (let i = 0; i < this.children.length; ++i)
         this.children[i].destroy();
@@ -320,7 +320,9 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
         this.virtualChildren[i].target.removeVirtualParent(this);
       this.virtualChildren = [];
       root.nodeHashTable.erase(this);
-      this.parent.removeChild(this);
+
+      if (removeFromParent)
+        this.parent.removeChild(this);
     };
 
     root.removeVirtualChild = function(child)

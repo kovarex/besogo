@@ -309,7 +309,7 @@ besogo.makeGameRoot = function(sizeX, sizeY) {
     root.destroy = function(root = this.getRoot(), removeFromParent = true)
     {
       for (let i = 0; i < this.children.length; ++i)
-        this.children[i].destroy();
+        this.children[i].destroy(false);
       this.children = [];
 
       for (let i = 0; i < this.virtualParents.length; ++i)

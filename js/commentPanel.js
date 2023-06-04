@@ -2,13 +2,19 @@ besogo.makeCommentPanel = function(container, editor)
 {
   'use strict';
   var infoTexts = {}, // Holds text nodes for game info properties
+      statusTable = null,
       gameInfoTable = document.createElement('table'),
       gameInfoEdit = document.createElement('table'),
       commentBox = document.createElement('div'),
       commentEdit = document.createElement('textarea'),
       playerInfoOrder = 'PW WR WT PB BR BT'.split(' '),
       infoOrder = 'HA KM RU TM OT GN EV PC RO DT RE ON GC AN US SO CP'.split(' '),
-      infoIds = {
+      noneSelection = null,
+      deadSelection = null,
+      koSelection = null,
+      aliveSelection = null,
+      infoIds =
+      {
           PW: 'White Player',
           WR: 'White Rank',
           WT: 'White Team',
@@ -38,11 +44,11 @@ besogo.makeCommentPanel = function(container, editor)
           CP: 'Copyright'
       };
 
-  //container.appendChild(makeInfoButton());
-  //container.appendChild(makeInfoEditButton());
+  statusTable = createStatusTable();
   container.appendChild(makeCommentButton());
   var correctButton = makeCorrectVariantButton();
   container.appendChild(correctButton);
+  container.appendChild(statusTable);
   container.appendChild(gameInfoTable);
   container.appendChild(gameInfoEdit);
   infoTexts.C = document.createTextNode('');
@@ -68,8 +74,82 @@ besogo.makeCommentPanel = function(container, editor)
       this.blur(); // No previous focus target, blur instead
   }
 
+  function createRadioButton(target, name, statusType)
+  {
+    var selection = document.createElement('input');
+    selection.type = "radio";
+    selection.id = name;
+    selection.name = 'status';
+    selection.onclick = function()
+    {
+      editor.getCurrent().status = besogo.makeStatusSimple(statusType);
+    }
+    target.appendChild(selection);
+
+    var label = document.createElement('label');
+    label.textContent = name;
+    label.htmlFor = name;
+    target.appendChild(label);
+    
+    return selection;
+  }
+  
+  function createRadioButtonRow(table, name, statusType)
+  {
+    var row = table.insertRow(-1);
+    var cell = row.insertCell(0);
+    return createRadioButton(cell, name, statusType);
+  }
+  
+  function createStatusTable()
+  {
+    var table = document.createElement('table');
+    
+    noneSelection = createRadioButtonRow(table, 'none', STATUS_NONE);
+    deadSelection = createRadioButtonRow(table, 'dead', STATUS_DEAD);
+    koSelection = createRadioButtonRow(table, 'ko', STATUS_KO);
+    aliveSelection = createRadioButtonRow(table, 'alive', STATUS_ALIVE);
+    
+    return table;
+  }
+  
+  function updateStatus()
+  {
+    if (!editor.getCurrent().status)
+    {
+      noneSelection.checked = true;
+      return;
+    }
+    
+    if (editor.getCurrent().status.blackFirst.type == STATUS_DEAD)
+    {
+      deadSelection.checked = true;
+      return;
+    }
+    
+    if (editor.getCurrent().status.blackFirst.type == STATUS_KO)
+    {
+      koSelection.checked = true;
+      return;
+    }
+    
+    if (editor.getCurrent().status.blackFirst.type == STATUS_SEKI)
+    {
+      sekiSelection.checked = true;
+      return;
+    }
+    
+    if (editor.getCurrent().status.blackFirst.type == STATUS_ALIVE)
+    {
+      aliveSelection.checked = true;
+      return;
+    }
+  }
+
   function update(msg)
   {
+    updateStatus();
+    
     var temp; // Scratch for strings
 
     if (msg.navChange)

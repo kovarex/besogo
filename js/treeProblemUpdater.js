@@ -127,6 +127,8 @@ besogo.updateStatusValuesInternal = function(node)
 
   for (let i = 0; i < node.children.length; ++i)
     besogo.updateStatusValuesInternal(node.children[i]);
+  for (let i = 0; i < node.virtualChildren.length; ++i)
+    besogo.updateStatusValuesInternal(node.virtualChildren[i].target);
 
   if (node.nextIsBlack())
     node.status = besogo.makeStatusSimple(STATUS_ALIVE_NONE);

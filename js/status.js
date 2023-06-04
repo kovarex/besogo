@@ -15,11 +15,39 @@ besogo.makeStatusInternal = function(type)
     if (this.type == STATUS_DEAD)
       return "DEAD";
     if (this.type == STATUS_KO)
-      return "KO";
+    {
+      let result = "KO";
+      if (!this.extraThreats || this.extraThreats >= 0)
+        result += "+";
+      else
+        result += "-";
+
+      if (this.extraThreats > 0)
+        result += (this.extraThreats + 1)
+      else if (this.extraThreats < -1)
+        result += -this.extraThreats;
+      return result;
+    }
+
     if (this.type == STATUS_SEKI)
       return "SEKI";
     if (this.type == STATUS_ALIVE)
       return "ALIVE";
+  }
+
+  status.setKo = function(extraThreats)
+  {
+    this.type = STATUS_KO;
+    this.extraThreats = extraThreats;
+  }
+
+  status.better = function(other)
+  {
+    if (this.type != other.type)
+      return this.type < other.type;
+    if (this.type == STATUS_KO)
+      return this.extraThreats > other.extraThreats;
+    return false;
   }
   return status;
 }
@@ -43,18 +71,43 @@ besogo.loadStatusInternalFromString = function(str)
 {
   if (str == "DEAD")
     return besogo.makeStatusInternal(STATUS_DEAD);
-  if (str == "KO")
-    return besogo.makeStatusInternal(STATUS_KO);
   if (str == "SEKI")
     return besogo.makeStatusInternal(STATUS_SEKI);
   if (str == "ALIVE")
     return besogo.makeStatusInternal(STATUS_ALIVE);
+
+  if (str.length > 2 && str[0] == "K" && str[1] == "O")
+  {
+    let result = besogo.makeStatusInternal(STATUS_KO);
+    if (str[2] == "+")
+    {
+      if (str.length == 3)
+      {
+        result.extraThreats = 0;
+        return result;
+      }
+      let number = Number(str.substr(3, str.length - 3));
+      result.extraThreats = number - 1;
+      return result;
+    }
+    if (str[2] == "-")
+    {
+      if (str.length == 3)
+      {
+        result.extraThreats = -1;
+        return result;
+      }
+      let number = Number(str.substr(3, str.length - 3));
+      result.extraThreats = -number;
+      return result;
+    }
+  }
 }
 
-besogo.makeStatus = function(blackFirst, whiteFirst = null)
+besogo.makeStatus = function(blackFirst = null, whiteFirst = null)
 {
   var status = [];
-  status.blackFirst = blackFirst;
+  status.blackFirst = blackFirst ? blackFirst : besogo.makeStatusInternal(STATUS_NONE);
   status.whiteFirst = whiteFirst ? whiteFirst : besogo.makeStatusInternal(STATUS_ALIVE);
 
   status.str = function()
@@ -73,9 +126,12 @@ besogo.makeStatus = function(blackFirst, whiteFirst = null)
   {
     if (this.blackFirst.type == STATUS_NONE)
       return false;
-    if (this.blackFirst.type != other.blackFirst.type)
-      return this.blackFirst.type < other.blackFirst.type;
-    return false;
+    return this.blackFirst.better(other.blackFirst);
+  }
+
+  status.setKo = function(extraThreats)
+  {
+    this.blackFirst.setKo(extraThreats);
   }
 
   return status;

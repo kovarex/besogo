@@ -95,6 +95,7 @@ besogo.pruneTree = function(root, node)
 besogo.clearCorrectValues = function(node)
 {
   delete node.correct;
+  node.status = null;
   for (let i = 0; i < node.children.length; ++i)
     besogo.clearCorrectValues(node.children[i]);
 }
@@ -103,6 +104,45 @@ besogo.updateCorrectValues = function(node)
 {
   besogo.clearCorrectValues(node);
   besogo.updateCorrectValuesInternal(node);
+  besogo.updateStatusValuesInternal(node);
+}
+
+besogo.updateStatusResult = function(blacksMove, child, status)
+{
+  if (child.status.better(status) == blacksMove)
+    return child.status;
+  else
+    return status;
+}
+
+besogo.updateStatusValuesInternal = function(node)
+{
+  if (node.statusSource)
+  {
+    node.status = node.statusSource;
+    return;
+  }
+  if (node.status)
+    return;
+
+  for (let i = 0; i < node.children.length; ++i)
+    besogo.updateStatusValuesInternal(node.children[i]);
+  for (let i = 0; i < node.virtualChildren.length; ++i)
+    besogo.updateStatusValuesInternal(node.virtualChildren[i].target);
+
+  if (node.nextIsBlack())
+    node.status = besogo.makeStatusSimple(STATUS_NONE);
+  else
+    node.status = besogo.makeStatusSimple(STATUS_ALIVE_NONE);
+  var blacksMove = node.nextIsBlack();
+
+  for (let i = 0; i < node.children.length; ++i)
+    node.status = besogo.updateStatusResult(blacksMove, node.children[i], node.status);
+  for (let i = 0; i < node.virtualChildren.length; ++i)
+    node.status = besogo.updateStatusResult(blacksMove, node.virtualChildren[i].target, node.status);
+
+  if (node.status.blackFirst.type == STATUS_ALIVE_NONE)
+    node.status = besogo.makeStatusSimple(STATUS_NONE);
 }
 
 besogo.updateCorrectValuesInternal = function(node)

@@ -27,6 +27,7 @@ besogo.makeGameRoot = function(sizeX, sizeY)
       node.correctSource = false;
       node.correct = false;
       node.cameFrom = null;
+      node.statusSource = null;
       node.status = null;
   }
   initNode(root, null); // Initialize root node with null parent

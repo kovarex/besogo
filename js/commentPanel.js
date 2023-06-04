@@ -82,7 +82,8 @@ besogo.makeCommentPanel = function(container, editor)
     selection.name = 'status';
     selection.onclick = function()
     {
-      editor.getCurrent().status = besogo.makeStatusSimple(statusType);
+      editor.getCurrent().statusSource = besogo.makeStatusSimple(statusType);
+      besogo.updateCorrectValues(editor.getCurrent().getRoot());
     }
     target.appendChild(selection);
 
@@ -115,7 +116,8 @@ besogo.makeCommentPanel = function(container, editor)
   
   function updateStatus()
   {
-    if (!editor.getCurrent().status)
+    if (!editor.getCurrent().status ||
+        editor.getCurrent().status.blackFirst.type == STATUS_NONE)
     {
       noneSelection.checked = true;
       return;

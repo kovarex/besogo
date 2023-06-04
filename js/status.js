@@ -3,11 +3,13 @@ const STATUS_DEAD = 1;
 const STATUS_KO = 2;
 const STATUS_SEKI = 3;
 const STATUS_ALIVE = 4;
+const STATUS_ALIVE_NONE = 5;
 
 besogo.makeStatusInternal = function(type)
 {
-  var status = { type: type};
-  
+  var status = [];
+  status.type = type;
+
   status.str = function()
   {
     if (this.type == STATUS_DEAD)
@@ -32,7 +34,7 @@ besogo.makeStatus = function(blackFirst)
   var status = [];
   status.whiteFirst = besogo.makeStatusInternal(STATUS_ALIVE);
   status.blackFirst = blackFirst;
-  
+
   status.str = function()
   {
     var result = "";
@@ -44,6 +46,15 @@ besogo.makeStatus = function(blackFirst)
     result += this.blackFirst.str();
     return result;
   }
-  
+
+  status.better = function(other)
+  {
+    if (this.blackFirst.type == STATUS_NONE)
+      return false;
+    if (this.blackFirst.type != other.blackFirst.type)
+      return this.blackFirst.type < other.blackFirst.type;
+    return false;
+  }
+
   return status;
 }

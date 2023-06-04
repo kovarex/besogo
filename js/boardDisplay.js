@@ -427,6 +427,22 @@ besogo.makeBoardDisplay = function(container, editor)
     markupGroup = group;
   }
 
+  function redrawNextMoveStatus(group, node, move)
+  {
+    if (node.status.blackFirst.type == STATUS_NONE)
+      return;
+    var label = besogo.svgLabel(svgPos(move.x), svgPos(move.y + 0.25), 'black', node.status.str(), 25);
+    group.appendChild(label);
+  }
+
+  function redrawNextMoveStatuses(group, current)
+  {
+    for (let i = 0; i < current.children.length; ++i)
+      redrawNextMoveStatus(group, current.children[i], current.children[i].move);
+    for (let i = 0; i < current.virtualChildren.length; ++i)
+      redrawNextMoveStatus(group, current.virtualChildren[i].target, current.virtualChildren[i].move);
+  }
+
   function redrawNextMoves(current)
   {
     var group = besogo.svgEl("g");
@@ -447,6 +463,7 @@ besogo.makeBoardDisplay = function(container, editor)
           group.appendChild(element);
         }
       }
+    redrawNextMoveStatuses(group, current);
     svg.replaceChild(group, nextMoveGroup); // Replace the markup group
     nextMoveGroup = group;
   }

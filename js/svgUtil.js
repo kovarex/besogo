@@ -185,27 +185,30 @@ besogo.svgBlock = function(x, y, color) {
 };
 
 // Makes a label at (x, y)
-besogo.svgLabel = function(x, y, color, label) {
-    var element,
-        size;
+besogo.svgLabel = function(x, y, color, label, size = null) {
+    var element;
 
     // Trims label to 3 characters
-    if (label.length > 3) {
+    if (label.length > 6)
         label = label.slice(0, 2) + '…';
-    }
 
     // Set font size according to label length
-    switch(label.length) {
+    if (!size)
+      switch(label.length)
+      {
         case 1:
-            size = 72;
-            break;
+          size = 72;
+          break;
         case 2:
-            size = 56;
-            break;
+          size = 56;
+          break;
         case 3:
-            size = 36;
-            break;
-    }
+          size = 36;
+          break;
+        default:
+          size = 20;
+          break;
+      }
 
     element = besogo.svgEl("text", {
         x: x,

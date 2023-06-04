@@ -15,24 +15,28 @@ besogo.makeStatusInternal = function(type)
     if (this.type == STATUS_DEAD)
       return "DEAD";
     if (this.type == STATUS_KO)
-    {
-      let result = "KO";
-      if (!this.extraThreats || this.extraThreats >= 0)
-        result += "+";
-      else
-        result += "-";
-
-      if (this.extraThreats > 0)
-        result += (this.extraThreats + 1)
-      else if (this.extraThreats < -1)
-        result += -this.extraThreats;
-      return result;
-    }
+      return result = 'KO' + this.getKoStr();
 
     if (this.type == STATUS_SEKI)
       return "SEKI";
     if (this.type == STATUS_ALIVE)
       return "ALIVE";
+  }
+
+  status.getKoStr = function()
+  {
+    console.assert(this.type == STATUS_KO);
+    let result = '';
+    if (!this.extraThreats || this.extraThreats >= 0)
+      result += "+";
+    else
+      result += "-";
+
+    if (this.extraThreats > 0)
+      result += (this.extraThreats + 1)
+    else if (this.extraThreats < -1)
+      result += -this.extraThreats;
+    return result;
   }
 
   status.setKo = function(extraThreats)
@@ -76,9 +80,11 @@ besogo.loadStatusInternalFromString = function(str)
   if (str == "ALIVE")
     return besogo.makeStatusInternal(STATUS_ALIVE);
 
-  if (str.length > 2 && str[0] == "K" && str[1] == "O")
+  if (str.length >= 2 && str[0] == "K" && str[1] == "O")
   {
     let result = besogo.makeStatusInternal(STATUS_KO);
+    if (str.length == 2)
+      return result;
     if (str[2] == "+")
     {
       if (str.length == 3)

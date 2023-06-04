@@ -12,6 +12,7 @@ besogo.makeCommentPanel = function(container, editor)
       noneSelection = null,
       deadSelection = null,
       koSelection = null,
+      koExtraThreats = null,
       sekiSelection = null,
       aliveSelection = null,
       infoIds =
@@ -88,30 +89,46 @@ besogo.makeCommentPanel = function(container, editor)
     label.textContent = name;
     label.htmlFor = name;
     target.appendChild(label);
-    
+
     return selection;
   }
-  
-  function createRadioButtonRow(table, name, statusType)
+
+  function createRadioButtonRow(table, name, statusType, otherInput = null)
   {
     var row = table.insertRow(-1);
     var cell = row.insertCell(0);
-    return createRadioButton(cell, name, statusType);
+    let result = createRadioButton(cell, name, statusType);
+    let cell2 = row.insertCell(-1);
+    if (otherInput)
+      cell2.appendChild(otherInput);
+    return result;
   }
-  
+
   function createStatusTable()
   {
     var table = document.createElement('table');
-    
+
     noneSelection = createRadioButtonRow(table, 'none', STATUS_NONE);
     deadSelection = createRadioButtonRow(table, 'dead', STATUS_DEAD);
-    koSelection = createRadioButtonRow(table, 'ko', STATUS_KO);
+
+    koExtraThreats = document.createElement('input');
+    koExtraThreats.type = 'text';
+    koExtraThreats.oninput = function(event)
+    {
+      if (!editor.getCurrent().statusSource)
+        return;
+      if (editor.getCurrent().statusSource.blackFirst.type != STATUS_KO)
+        return;
+      editor.getCurrent().setStatusSource(besogo.loadStatusFromString('KO' + event.target.value))
+    }
+    koSelection = createRadioButtonRow(table, 'ko', STATUS_KO, koExtraThreats);
+
     sekiSelection = createRadioButtonRow(table, 'seki', STATUS_SEKI);
     aliveSelection = createRadioButtonRow(table, 'alive', STATUS_ALIVE);
-    
+
     return table;
   }
-  
+
   function updateStatus()
   {
     if (!editor.getCurrent().status ||
@@ -120,25 +137,26 @@ besogo.makeCommentPanel = function(container, editor)
       noneSelection.checked = true;
       return;
     }
-    
+
     if (editor.getCurrent().status.blackFirst.type == STATUS_DEAD)
     {
       deadSelection.checked = true;
       return;
     }
-    
+
     if (editor.getCurrent().status.blackFirst.type == STATUS_KO)
     {
       koSelection.checked = true;
+      koExtraThreats.value = editor.getCurrent().status.blackFirst.getKoStr();
       return;
     }
-    
+
     if (editor.getCurrent().status.blackFirst.type == STATUS_SEKI)
     {
       sekiSelection.checked = true;
       return;
     }
-    
+
     if (editor.getCurrent().status.blackFirst.type == STATUS_ALIVE)
     {
       aliveSelection.checked = true;
@@ -149,7 +167,7 @@ besogo.makeCommentPanel = function(container, editor)
   function update(msg)
   {
     updateStatus();
-    
+
     var temp; // Scratch for strings
 
     if (msg.navChange)

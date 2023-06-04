@@ -12,6 +12,7 @@ besogo.makeCommentPanel = function(container, editor)
       noneSelection = null,
       deadSelection = null,
       koSelection = null,
+      sekiSelection = null,
       aliveSelection = null,
       infoIds =
       {
@@ -109,6 +110,7 @@ besogo.makeCommentPanel = function(container, editor)
     noneSelection = createRadioButtonRow(table, 'none', STATUS_NONE);
     deadSelection = createRadioButtonRow(table, 'dead', STATUS_DEAD);
     koSelection = createRadioButtonRow(table, 'ko', STATUS_KO);
+    sekiSelection = createRadioButtonRow(table, 'seki', STATUS_SEKI);
     aliveSelection = createRadioButtonRow(table, 'alive', STATUS_ALIVE);
     
     return table;

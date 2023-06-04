@@ -131,9 +131,9 @@ besogo.updateStatusValuesInternal = function(node)
     besogo.updateStatusValuesInternal(node.virtualChildren[i].target);
 
   if (node.nextIsBlack())
-    node.status = besogo.makeStatusSimple(STATUS_NONE);
-  else
     node.status = besogo.makeStatusSimple(STATUS_ALIVE_NONE);
+  else
+    node.status = besogo.makeStatusSimple(STATUS_NONE);
   var blacksMove = node.nextIsBlack();
 
   for (let i = 0; i < node.children.length; ++i)

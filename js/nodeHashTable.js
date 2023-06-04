@@ -38,6 +38,14 @@ besogo.makeNodeHashTable = function()
         return hashPoint[i];
     return null;
   }
+  
+  nodeHashTable.size = function()
+  {
+    let result = 0;
+    for (var index in this.table)
+      result += this.table[index].length;
+    return result;
+  }
 
   return nodeHashTable;
 }

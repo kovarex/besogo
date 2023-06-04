@@ -1,6 +1,5 @@
-besogo.makeGameRoot = function(sizeX, sizeY)
+besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
 {
-  'use strict';
   var BLACK = -1, // Stone state constants
       WHITE = 1, // Equal to -BLACK
       EMPTY = 0, // Any falsy (e.g., undefined) value is also empty
@@ -281,6 +280,22 @@ besogo.makeGameRoot = function(sizeX, sizeY)
 
     return child;
   };
+  
+  root.registerMove = function(x, y)
+  {
+    let child = this.makeChild();
+    if (!child.playMove(x, y))
+      console.assert("Move couldn't be played");
+    this.registerChild(child);
+    return child;
+  }
+
+  root.registerChild = function(child)
+  {
+    this.addChild(child);
+    child.registerInVirtualMoves();
+    besogo.updateCorrectValues(this.getRoot());
+  }
 
   // Adds a child to this node
   root.addChild = function(child)
@@ -288,6 +303,7 @@ besogo.makeGameRoot = function(sizeX, sizeY)
     this.children.push(child);
     this.correct = false;
     this.correctSource = false;
+    return child;
   };
 
   // Remove child node from this node, returning false if failed
@@ -572,6 +588,12 @@ besogo.makeGameRoot = function(sizeX, sizeY)
         return result;
     }
     return null;
+  }
+  
+  root.setStatusSource = function(statusSource)
+  {
+    this.statusSource = statusSource;
+    besogo.updateCorrectValues(this.getRoot());
   }
 
   return root;

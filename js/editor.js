@@ -445,11 +445,9 @@ besogo.makeEditor = function(sizeX, sizeY)
         if (next.playMove(i, j, color, allowAll)) // Play in new node
         {
           // Keep (add to game state tree) only if move succeeds
-          current.addChild(next);
+          current.registerChild(next);
           current = next;
           // Notify tree change, navigation, and stone change
-          next.registerInVirtualMoves();
-          besogo.updateCorrectValues(current.getRoot());
           notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
           edited = true;
         }

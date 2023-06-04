@@ -81,11 +81,7 @@ besogo.makeCommentPanel = function(container, editor)
     selection.type = "radio";
     selection.id = name;
     selection.name = 'status';
-    selection.onclick = function()
-    {
-      editor.getCurrent().statusSource = besogo.makeStatusSimple(statusType);
-      besogo.updateCorrectValues(editor.getCurrent().getRoot());
-    }
+    selection.onclick = function() { editor.getCurrent().setStatusSource(besogo.makeStatusSimple(statusType)); }
     target.appendChild(selection);
 
     var label = document.createElement('label');

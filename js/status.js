@@ -29,16 +29,38 @@ besogo.makeStatusSimple = function(blackFirstType)
   return besogo.makeStatus(besogo.makeStatusInternal(blackFirstType));
 }
 
-besogo.makeStatus = function(blackFirst)
+besogo.loadStatusFromString = function(str)
 {
   var status = [];
-  status.whiteFirst = besogo.makeStatusInternal(STATUS_ALIVE);
+  var parts = str.split('/');
+  if (parts.length == 1)
+    return besogo.makeStatus(besogo.loadStatusInternalFromString(str));
+  return besogo.makeStatus(besogo.loadStatusInternalFromString(parts[0]),
+                           besogo.loadStatusInternalFromString(parts[1]));
+}
+
+besogo.loadStatusInternalFromString = function(str)
+{
+  if (str == "DEAD")
+    return besogo.makeStatusInternal(STATUS_DEAD);
+  if (str == "KO")
+    return besogo.makeStatusInternal(STATUS_KO);
+  if (str == "SEKI")
+    return besogo.makeStatusInternal(STATUS_SEKI);
+  if (str == "ALIVE")
+    return besogo.makeStatusInternal(STATUS_ALIVE);
+}
+
+besogo.makeStatus = function(blackFirst, whiteFirst = null)
+{
+  var status = [];
   status.blackFirst = blackFirst;
+  status.whiteFirst = whiteFirst ? whiteFirst : besogo.makeStatusInternal(STATUS_ALIVE);
 
   status.str = function()
   {
     var result = "";
-    if (this.whiteFirst.status != STATUS_ALIVE)
+    if (this.whiteFirst.type != STATUS_ALIVE)
     {
       result += this.whiteFirst.str();
       result += "/";

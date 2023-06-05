@@ -82,7 +82,11 @@ besogo.makeCommentPanel = function(container, editor)
     selection.type = "radio";
     selection.id = name;
     selection.name = 'status';
-    selection.onclick = function() { editor.getCurrent().setStatusSource(besogo.makeStatusSimple(statusType)); }
+    selection.onclick = function()
+    {
+      editor.getCurrent().setStatusSource(besogo.makeStatusSimple(statusType));
+      updateStatusEditability();
+    }
     target.appendChild(selection);
 
     var label = document.createElement('label');
@@ -129,8 +133,22 @@ besogo.makeCommentPanel = function(container, editor)
     return table;
   }
 
+  function updateStatusEditability()
+  {
+    let editable = !editor.getCurrent().hasChildIncludingVirtual();
+    noneSelection.disabled = !editable;
+    deadSelection.disabled = !editable;
+    koSelection.disabled = !editable;
+    koExtraThreats.disabled = !editable ||
+                              !editor.getCurrent().statusSource ||
+                              editor.getCurrent().statusSource.blackFirst.type != STATUS_KO;
+    sekiSelection.disabled = !editable;
+    aliveSelection.disabled = !editable;
+  }
+
   function updateStatus()
   {
+    updateStatusEditability();
     if (!editor.getCurrent().status ||
         editor.getCurrent().status.blackFirst.type == STATUS_NONE)
     {

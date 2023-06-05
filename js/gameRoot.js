@@ -32,6 +32,7 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   initNode(root, null); // Initialize root node with null parent
   root.relevantMoves = [];
   root.nodeHashTable = besogo.makeNodeHashTable();
+  root.status = besogo.makeStatusSimple(STATUS_NONE);
 
   // Plays a move, returns true if successful
   // Set allow to truthy to allow overwrite, suicide and ko

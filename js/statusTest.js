@@ -132,3 +132,10 @@ besogo.addTest("Status", "LoadingSgfWithStatusSourceNotOnLeafGetsFixed", functio
   CHECK_EQUALS(editor2.getRoot().children.length, 1);
   CHECK(editor2.getRoot().children[0].statusSource == null);
 });
+
+
+besogo.addTest("Status", "EmptyGameRootHasStatus", function()
+{
+  let root = besogo.makeGameRoot();
+  CHECK(root.status);
+});

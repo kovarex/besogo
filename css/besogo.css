@@ -104,10 +104,6 @@
     width: 100%;
 }
 
-.besogo-comment input[type='button'] {
-    float: right;
-}
-
 .besogo-comment textarea {
     height: 100%;
     width: 100%;

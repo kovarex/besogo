@@ -23,6 +23,13 @@ besogo.makeStatusInternal = function(type)
       return "ALIVE";
   }
 
+  status.strLong = function()
+  {
+    if (this.type == STATUS_KO)
+      return result = this.str() + ' (' + this.getKoStrLong() + ')';
+    return this.str();
+  }
+
   status.getKoStr = function()
   {
     console.assert(this.type == STATUS_KO);
@@ -37,6 +44,20 @@ besogo.makeStatusInternal = function(type)
     else if (this.extraThreats < -1)
       result += -this.extraThreats;
     return result;
+  }
+
+  status.getKoStrLong = function()
+  {
+    console.assert(this.type == STATUS_KO);
+    let result = '';
+    if (!this.extraThreats || this.extraThreats == 0)
+      return 'Black takes first';
+    if (this.extraThreats == -1)
+      return 'White takes first';
+    if (this.extraThreats > 0)
+      return 'White needs ' + this.extraThreats + ' threat' + (this.extraThreats > 1 ? 's' : '') + ' to start the ko';
+    if (this.extraThreats < 0)
+      return 'Black needs ' + (-this.extraThreats - 1) + ' threat' + (this.extraThreats < -2 ? 's' : '') + ' to start the ko';
   }
 
   status.setKo = function(extraThreats)
@@ -125,6 +146,18 @@ besogo.makeStatus = function(blackFirst = null, whiteFirst = null)
       result += "/";
     }
     result += this.blackFirst.str();
+    return result;
+  }
+
+  status.strLong = function()
+  {
+    var result = "";
+    if (this.whiteFirst.type != STATUS_ALIVE)
+    {
+      result += this.whiteFirst.strLong();
+      result += "/";
+    }
+    result += this.blackFirst.strLong();
     return result;
   }
 

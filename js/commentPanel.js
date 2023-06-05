@@ -2,6 +2,7 @@ besogo.makeCommentPanel = function(container, editor)
 {
   'use strict';
   var infoTexts = {}, // Holds text nodes for game info properties
+      statusLabel = null,
       statusTable = null,
       gameInfoTable = document.createElement('table'),
       gameInfoEdit = document.createElement('table'),
@@ -46,13 +47,19 @@ besogo.makeCommentPanel = function(container, editor)
           CP: 'Copyright'
       };
 
+  statusLabel = createStatusLabel();
   statusTable = createStatusTable();
-  container.appendChild(makeCommentButton());
+  let parentDiv = document.createElement('div');
+  container.appendChild(parentDiv);
   var correctButton = makeCorrectVariantButton();
-  container.appendChild(correctButton);
-  container.appendChild(statusTable);
-  container.appendChild(gameInfoTable);
-  container.appendChild(gameInfoEdit);
+  let correctButtonDiv = document.createElement('div');
+  correctButtonDiv.appendChild(correctButton);
+  parentDiv.appendChild(correctButtonDiv);
+  parentDiv.appendChild(statusLabel);
+  parentDiv.appendChild(statusTable);
+  container.appendChild(makeCommentButton());
+  //container.appendChild(gameInfoTable);
+  //container.appendChild(gameInfoEdit);
   infoTexts.C = document.createTextNode('');
   container.appendChild(commentBox);
   commentBox.appendChild(infoTexts.C);
@@ -65,7 +72,7 @@ besogo.makeCommentPanel = function(container, editor)
   });
 
   editor.addListener(update);
-  update({ navChange: true, gameInfo: editor.getGameInfo() });
+  update({ navChange: true});
   gameInfoEdit.style.display = 'none'; // Hide game info editting table initially
 
   function preventFocus(event)
@@ -108,6 +115,13 @@ besogo.makeCommentPanel = function(container, editor)
     return result;
   }
 
+  function createStatusLabel()
+  {
+    var label = document.createElement('label');
+    label.style.fontSize = 'x-large';
+    return label;
+  }
+
   function createStatusTable()
   {
     var table = document.createElement('table');
@@ -123,7 +137,8 @@ besogo.makeCommentPanel = function(container, editor)
         return;
       if (editor.getCurrent().statusSource.blackFirst.type != STATUS_KO)
         return;
-      editor.getCurrent().setStatusSource(besogo.loadStatusFromString('KO' + event.target.value))
+      editor.getCurrent().setStatusSource(besogo.loadStatusFromString('KO' + event.target.value));
+      updateStatusLabel();
     }
     koSelection = createRadioButtonRow(table, 'ko', STATUS_KO, koExtraThreats);
 
@@ -146,8 +161,19 @@ besogo.makeCommentPanel = function(container, editor)
     aliveSelection.disabled = !editable;
   }
 
+  function getStatusText()
+  {
+    return 'Status: ' + editor.getCurrent().status.strLong();
+  }
+
+  function updateStatusLabel()
+  {
+    statusLabel.textContent = getStatusText();
+  }
+
   function updateStatus()
   {
+    updateStatusLabel();
     updateStatusEditability();
     if (!editor.getCurrent().status ||
         editor.getCurrent().status.blackFirst.type == STATUS_NONE)
@@ -207,11 +233,6 @@ besogo.makeCommentPanel = function(container, editor)
       commentEdit.value = msg.comment;
     }
 
-    if (msg.gameInfo)
-    {
-      updateGameInfoTable(msg.gameInfo);
-      updateGameInfoEdit(msg.gameInfo);
-    }
     updateCorrectButton();
   }
 

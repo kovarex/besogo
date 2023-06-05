@@ -33,6 +33,7 @@ besogo.addTest("GameRoot", "RemoveVariation", function()
   CHECK_EQUALS(root.nodeHashTable.size(), 1);
 
   child.registerMove(6, 6);
+  CHECK(child.hasChildIncludingVirtual());
   CHECK_EQUALS(root.children.length, 1);
   CHECK_EQUALS(child.children.length, 1);
   CHECK_EQUALS(root.nodeHashTable.size(), 2);

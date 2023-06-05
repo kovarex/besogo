@@ -94,3 +94,41 @@ besogo.addTest("Status", "InitStatusOnLoad", function()
 
   CHECK_EQUALS(editor2.getRoot().children.length, 3);
 });
+
+besogo.addTest("Status", "SetStatusSourceOnNonLeaf", function()
+{
+  let root = besogo.makeGameRoot();
+  let child = root.registerMove(5, 5);
+  let childOfChild = child.registerMove(6, 6);
+  CHECK(child.hasChildIncludingVirtual());
+  CHECK(child.statusSource == null);
+  child.setStatusSource(besogo.makeStatusSimple(STATUS_DEAD));
+  CHECK(child.statusSource == null);
+});
+
+besogo.addTest("Status", "AddChildToNodeWithStatusSource", function()
+{
+  let root = besogo.makeGameRoot();
+  let child = root.registerMove(5, 5);
+  CHECK(!child.statusSource);
+  child.setStatusSource(besogo.makeStatusSimple(STATUS_DEAD));
+  CHECK(child.statusSource);
+  child.registerMove(6, 6);
+  CHECK(!child.statusSource);
+});
+
+besogo.addTest("Status", "LoadingSgfWithStatusSourceNotOnLeafGetsFixed", function()
+{
+  let editor = besogo.makeEditor();
+  let root = editor.getRoot();
+  let child = root.registerMove(5, 5);
+  child.registerMove(6, 6);
+  // setting it up "illegaly" to get to a wrong state.
+  child.statusSource = besogo.makeStatusSimple(STATUS_DEAD);
+
+  let editor2 = besogo.makeEditor();
+  besogo.loadSgf(besogo.parseSgf(besogo.composeSgf(editor)), editor2);
+
+  CHECK_EQUALS(editor2.getRoot().children.length, 1);
+  CHECK(editor2.getRoot().children[0].statusSource == null);
+});

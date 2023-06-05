@@ -96,6 +96,8 @@ besogo.clearCorrectValues = function(node)
 {
   delete node.correct;
   node.status = null;
+  if (node.hasChildIncludingVirtual())
+    node.statusSource = null;
   for (let i = 0; i < node.children.length; ++i)
     besogo.clearCorrectValues(node.children[i]);
 }

@@ -280,7 +280,7 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
 
     return child;
   };
-  
+
   root.registerMove = function(x, y)
   {
     let child = this.makeChild();
@@ -300,6 +300,8 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   // Adds a child to this node
   root.addChild = function(child)
   {
+    if (this.statusSource)
+      this.statusSource = null;
     this.children.push(child);
     this.correct = false;
     this.correctSource = false;
@@ -589,11 +591,33 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
     }
     return null;
   }
-  
+
   root.setStatusSource = function(statusSource)
   {
+    if (this.hasChildIncludingVirtual())
+      return false;
     this.statusSource = statusSource;
     besogo.updateCorrectValues(this.getRoot());
+    return true;
+  }
+
+  root.checkConsistency = function()
+  {
+    for (let i = 0; i < this.children.length; ++i)
+      this.children[i].checkConsistency();
+
+    if (this.statusSource)
+      console.assert(!this.hasChildIncludingVirtual());
+    if (this.correctSource)
+      console.assert(!this.hasChildIncludingVirtual());
+    if (this.nodeHashTable)
+      console.assert(this.parent == null);
+    console.assert(this.status != null);
+  }
+
+  root.hasChildIncludingVirtual = function()
+  {
+    return this.children.length != 0 || this.virtualChildren.length != 0;
   }
 
   return root;

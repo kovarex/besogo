@@ -121,6 +121,7 @@ besogo.updateStatusValuesInternal = function(node)
 {
   if (node.statusSource)
   {
+    console.assert(!this.hasChildIncludingVirtual());
     node.status = node.statusSource;
     return;
   }

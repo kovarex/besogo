@@ -85,6 +85,9 @@ besogo.loadSgf = function(sgf, editor)
       case 'S':
         node.statusSource = besogo.loadStatusFromString(prop.values.join().trim());
         break;
+      case 'G':
+        node.goal = besogo.loadGoalFromString(prop.values.join().trim());
+        break;
     }
   }
 

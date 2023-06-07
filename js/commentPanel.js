@@ -8,6 +8,7 @@ besogo.makeCommentPanel = function(container, editor)
       gameInfoEdit = document.createElement('table'),
       commentBox = document.createElement('div'),
       commentEdit = document.createElement('textarea'),
+      correctButton = makeCorrectVariantButton(),
       playerInfoOrder = 'PW WR WT PB BR BT'.split(' '),
       infoOrder = 'HA KM RU TM OT GN EV PC RO DT RE ON GC AN US SO CP'.split(' '),
       noneSelection = null,
@@ -16,6 +17,9 @@ besogo.makeCommentPanel = function(container, editor)
       koExtraThreats = null,
       sekiSelection = null,
       aliveSelection = null,
+      goalNoneSelect = null,
+      goalKillSelection = null,
+      goalLiveSelection = null,
       infoIds =
       {
           PW: 'White Player',
@@ -51,9 +55,10 @@ besogo.makeCommentPanel = function(container, editor)
   statusTable = createStatusTable();
   let parentDiv = document.createElement('div');
   container.appendChild(parentDiv);
-  var correctButton = makeCorrectVariantButton();
+
   let correctButtonDiv = document.createElement('div');
   correctButtonDiv.appendChild(correctButton);
+  parentDiv.appendChild(createGoalTable());
   parentDiv.appendChild(correctButtonDiv);
   parentDiv.appendChild(statusLabel);
   parentDiv.appendChild(statusTable);
@@ -83,20 +88,16 @@ besogo.makeCommentPanel = function(container, editor)
       this.blur(); // No previous focus target, blur instead
   }
 
-  function createRadioButton(target, name, statusType)
+  function createRadioButton(target, name, group, onClick)
   {
-    var selection = document.createElement('input');
+    let selection = document.createElement('input');
     selection.type = "radio";
     selection.id = name;
-    selection.name = 'status';
-    selection.onclick = function()
-    {
-      editor.getCurrent().setStatusSource(besogo.makeStatusSimple(statusType));
-      updateStatusEditability();
-    }
+    selection.name = group;
+    selection.onclick = onClick
     target.appendChild(selection);
 
-    var label = document.createElement('label');
+    let label = document.createElement('label');
     label.textContent = name;
     label.htmlFor = name;
     target.appendChild(label);
@@ -106,9 +107,16 @@ besogo.makeCommentPanel = function(container, editor)
 
   function createRadioButtonRow(table, name, statusType, otherInput = null)
   {
-    var row = table.insertRow(-1);
-    var cell = row.insertCell(0);
-    let result = createRadioButton(cell, name, statusType);
+    let row = table.insertRow(-1);
+    let cell = row.insertCell(0);
+    let result = createRadioButton(cell,
+                                   name,
+                                   'status',
+                                   function()
+                                   {
+                                      editor.getCurrent().setStatusSource(besogo.makeStatusSimple(statusType));
+                                      updateStatusEditability();
+                                   });
     let cell2 = row.insertCell(-1);
     if (otherInput)
       cell2.appendChild(otherInput);
@@ -117,14 +125,14 @@ besogo.makeCommentPanel = function(container, editor)
 
   function createStatusLabel()
   {
-    var label = document.createElement('label');
+    let label = document.createElement('label');
     label.style.fontSize = 'x-large';
     return label;
   }
 
   function createStatusTable()
   {
-    var table = document.createElement('table');
+    let table = document.createElement('table');
 
     noneSelection = createRadioButtonRow(table, 'none', STATUS_NONE);
     deadSelection = createRadioButtonRow(table, 'dead', STATUS_DEAD);
@@ -208,9 +216,21 @@ besogo.makeCommentPanel = function(container, editor)
     }
   }
 
+  function updateGoal()
+  {
+    let goal = editor.getRoot().goal;
+    if (goal == GOAL_NONE)
+      goalNoneSelect.checked = true;
+    else if (goal == GOAL_KILL)
+      goalKillSelection.checked = true;
+    else if (goal == GOAL_LIVE)
+      goalLiveSelection = true;
+  }
+
   function update(msg)
   {
     updateStatus();
+    updateGoal();
 
     var temp; // Scratch for strings
 
@@ -390,9 +410,46 @@ besogo.makeCommentPanel = function(container, editor)
     return button;
   }
 
+  function createGoalRadioButton(parent, name, goal)
+  {
+    return createRadioButton(parent,
+                             name,
+                             'goal',
+                             function()
+                             {
+                               editor.getCurrent().getRoot().setGoal(goal);
+                             });
+  }
+
+  function createGoalTable()
+  {
+    let table = document.createElement('table');
+
+    let row = table.insertRow(-1);
+    table.appendChild(row);
+    let cell = row.insertCell(-1);
+    let label = document.createElement('label');
+    label.textContent = 'Goal: ';
+    label.style.fontSize = 'x-large';
+    cell.appendChild(label);
+    cell = row.insertCell(-1);
+
+    goalNoneSelect = createGoalRadioButton(cell, 'undefined', GOAL_NONE);
+    row = table.insertRow(-1);
+    cell = row.insertCell(-1);
+    cell = row.insertCell(-1);
+    goalKillSelection = createGoalRadioButton(cell, 'kill', GOAL_KILL);
+    row = table.insertRow(-1);
+    cell = row.insertCell(-1);
+    cell = row.insertCell(-1);
+    goalLiveSelection = createGoalRadioButton(cell, 'live', GOAL_LIVE);
+
+    return table;
+  }
+
   function updateCorrectButton()
   {
-    var current = editor.getCurrent();
+    let current = editor.getCurrent();
     if (current.children.length || current.virtualChildren.length)
       correctButton.disabled = true;
     else

@@ -116,6 +116,12 @@ besogo.composeSgf = function(editor, expand = false)
       string += 'S[' + node.statusSource.str() + ']';
     }
 
+    if (node.parent == null && node.goal != GOAL_NONE)
+     {
+      string += (string ? '\n' : '');
+      string += 'G[' + besogo.goalStr(node.goal) + ']';
+    }
+
     return string;
   }
 
@@ -164,7 +170,7 @@ besogo.composeSgf = function(editor, expand = false)
   {
     if (num > 26) // Numbers 27-52 to A-Z
       return String.fromCharCode('A'.charCodeAt(0) + num - 27);
-    
+
     // Numbers 1-26 to a-z
     return String.fromCharCode('a'.charCodeAt(0) + num - 1);
   }

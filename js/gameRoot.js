@@ -32,6 +32,7 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   initNode(root, null); // Initialize root node with null parent
   root.relevantMoves = [];
   root.nodeHashTable = besogo.makeNodeHashTable();
+  root.goal = GOAL_NONE;
   root.status = besogo.makeStatusSimple(STATUS_NONE);
 
   // Plays a move, returns true if successful
@@ -619,6 +620,12 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   root.hasChildIncludingVirtual = function()
   {
     return this.children.length != 0 || this.virtualChildren.length != 0;
+  }
+
+  root.setGoal = function(goal)
+  {
+    console.assert(this.parent == null);
+    this.goal = goal;
   }
 
   return root;

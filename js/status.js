@@ -1,3 +1,7 @@
+const GOAL_NONE = 0;
+const GOAL_KILL = 1;
+const GOAL_LIVE = 2;
+
 const STATUS_NONE = 0;
 const STATUS_DEAD = 1;
 const STATUS_KO = 2;
@@ -90,6 +94,24 @@ besogo.loadStatusFromString = function(str)
     return besogo.makeStatus(besogo.loadStatusInternalFromString(str));
   return besogo.makeStatus(besogo.loadStatusInternalFromString(parts[0]),
                            besogo.loadStatusInternalFromString(parts[1]));
+}
+
+besogo.loadGoalFromString = function(str)
+{
+  if (str == "KILL")
+    return GOAL_KILL;
+  if (str == "LIVE")
+    return GOAL_LIVE;
+  return GOAL_NONE;
+}
+
+besogo.goalStr = function(goal)
+{
+  if (goal == GOAL_KILL)
+    return "KILL";
+  if (goal == GOAL_LIVE)
+    return "LIVE";
+  return '';
 }
 
 besogo.loadStatusInternalFromString = function(str)

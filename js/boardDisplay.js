@@ -456,12 +456,8 @@ besogo.makeBoardDisplay = function(container, editor)
       for (let i = 0; i < current.virtualChildren.length; ++i)
       {
         var redirect = current.virtualChildren[i];
-        // Don't show variations which allow black to get from incorrect to correct
-        if (current.correct || !redirect.target.correct)
-        {
-          var element = besogo.svgFilledCircle(svgPos(redirect.move.x), svgPos(redirect.move.y), redirect.target.getCorrectColor(), 8);
-          group.appendChild(element);
-        }
+        var element = besogo.svgFilledCircle(svgPos(redirect.move.x), svgPos(redirect.move.y), redirect.target.getCorrectColor(), 8);
+        group.appendChild(element);
       }
     redrawNextMoveStatuses(group, current);
     svg.replaceChild(group, nextMoveGroup); // Replace the markup group

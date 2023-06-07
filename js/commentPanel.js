@@ -183,8 +183,9 @@ besogo.makeCommentPanel = function(container, editor)
         return;
       if (editor.getCurrent().statusSource.blackFirst.type != STATUS_KO)
         return;
-      editor.getCurrent().setStatusSource(besogo.loadStatusFromString('KO' + event.target.value));
-      newStatus.setApproachKo(koApproaches.value, editor.getCurrent().statusSource.extraThreats);
+      let newStatus = besogo.loadStatusFromString('KO' + event.target.value);
+      newStatus.setApproachKo(Number(koApproaches.value), newStatus.blackFirst.extraThreats);
+      editor.getCurrent().setStatusSource(newStatus);
       updateStatusLabel();
     }
     koSettingsSpan.appendChild(koExtraThreats);

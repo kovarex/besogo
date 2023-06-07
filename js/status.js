@@ -50,7 +50,7 @@ besogo.makeStatusInternal = function(type)
   status.getKoApproachesStr = function()
   {
     console.assert(this.type == STATUS_KO);
-    if (!this.approaches)
+    if (!this.approaches || this.approaches == 0)
       return '';
 
     let result = '';

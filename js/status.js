@@ -21,7 +21,7 @@ besogo.makeStatusInternal = function(type)
     if (this.type == STATUS_DEAD)
       return "DEAD";
     if (this.type == STATUS_KO)
-      return result = 'KO' + this.getKoStr();
+      return result = this.getKoApproachesStr() + 'KO' + this.getKoStr();
 
     if (this.type == STATUS_SEKI)
     {
@@ -31,11 +31,39 @@ besogo.makeStatusInternal = function(type)
       return "ALIVE";
   }
 
+  status.getApproachCount = function()
+  {
+    if (!this.approaches)
+      return 0;
+    return this.approaches;
+  }
+
   status.strLong = function()
   {
     if (this.type == STATUS_KO)
-      return result = this.str() + ' (' + this.getKoStrLong() + ')';
+      return result = this.str() + ' (' + this.getKoApproachStrLong() + this.getKoStrLong() + ')';
+    if (this.type == STATUS_SEKI)
+      return this.str() + (this.sente ? " in sente" : " in gote");
     return this.str();
+  }
+
+  status.getKoApproachesStr = function()
+  {
+    console.assert(this.type == STATUS_KO);
+    if (!this.approaches)
+      return '';
+
+    let result = '';
+    if (this.approaches > 0)
+      result += "A+";
+    else
+      result += "A-";
+
+    if (this.approaches > 0)
+      result += this.approaches;
+    else if (this.approaches < 0)
+      result += -this.approaches;
+    return result;
   }
 
   status.getKoStr = function()
@@ -54,10 +82,20 @@ besogo.makeStatusInternal = function(type)
     return result;
   }
 
+  status.getKoApproachStrLong = function()
+  {
+    console.assert(this.type == STATUS_KO);
+    if (!this.approaches || this.approaches == 0)
+      return '';
+    if (this.approaches > 0)
+      return 'White needs to do ' + this.approaches + ' approach move' + (this.approaches > 1 ? 's' : '') + ' to start a direct ko, ';
+    if (this.approaches < 0)
+      return 'Black needs to do ' + -this.approaches + ' approach move' + (this.approaches < -1 ? 's' : '') + ' to start a direct ko, ';
+  }
+
   status.getKoStrLong = function()
   {
     console.assert(this.type == STATUS_KO);
-    let result = '';
     if (!this.extraThreats || this.extraThreats == 0)
       return 'Black takes first';
     if (this.extraThreats == -1)
@@ -74,6 +112,13 @@ besogo.makeStatusInternal = function(type)
     this.extraThreats = extraThreats;
   }
 
+  status.setApproachKo = function(approaches, extraThreats = 0)
+  {
+    this.type = STATUS_KO;
+    this.approaches = approaches;
+    this.extraThreats = extraThreats;
+  }
+
   status.setSeki = function(sente)
   {
     this.type = STATUS_SEKI;
@@ -85,7 +130,10 @@ besogo.makeStatusInternal = function(type)
     if (this.type != other.type)
       return this.type < other.type;
     if (this.type == STATUS_KO)
-      return this.extraThreats > other.extraThreats;
+      if (this.approaches != other.approaches)
+        return this.approaches > other.approaches;
+      else
+        return this.extraThreats > other.extraThreats;
     if (this.type == STATUS_SEKI)
       return this.sente && !other.sente;
     return false;
@@ -141,9 +189,25 @@ besogo.loadStatusInternalFromString = function(str)
   if (str == "ALIVE")
     return besogo.makeStatusInternal(STATUS_ALIVE);
 
+  var approaches = 0;
+  if (str[0] == "A" && (str[1] == "+" || str[1] == "-"))
+  {
+    let i = 2;
+    while (!isNaN(parseInt(str[i])))
+    {
+      approaches *= 10;
+      approaches += parseInt(str[i]);
+      ++i;
+    }
+    if (str[1] == "-")
+      approaches = -approaches;
+    str = str.substr(i, str.length - i);
+  }
+
   if (str.length >= 2 && str[0] == "K" && str[1] == "O")
   {
     let result = besogo.makeStatusInternal(STATUS_KO);
+    result.approaches = approaches;
     if (str.length == 2)
       return result;
     if (str[2] == "+")
@@ -211,6 +275,11 @@ besogo.makeStatus = function(blackFirst = null, whiteFirst = null)
   status.setKo = function(extraThreats)
   {
     this.blackFirst.setKo(extraThreats);
+  }
+
+  status.setApproachKo = function(approaches, extraThreats = 0)
+  {
+    this.blackFirst.setApproachKo(approaches, extraThreats);
   }
 
   status.setSeki = function(sente)

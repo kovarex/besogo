@@ -60,6 +60,54 @@ besogo.addTest("Status", "DeadBetterThanko", function()
   CHECK(!status2.better(status1));
 });
 
+besogo.addTest("Status", "ApproachKoGood", function()
+{
+  let status = besogo.makeStatusSimple(STATUS_KO);
+  status.setApproachKo(1);
+  CHECK_EQUALS(status.str(), "A+1KO+");
+});
+
+besogo.addTest("Status", "ApproachKoBad", function()
+{
+  let status = besogo.makeStatusSimple(STATUS_KO);
+  status.setApproachKo(-1);
+  CHECK_EQUALS(status.str(), "A-1KO+");
+});
+
+besogo.addTest("Status", "ApproachKoGoodBetterThanApproachKoBad", function()
+{
+  let statusBad = besogo.makeStatusSimple(STATUS_KO);
+  statusBad.setApproachKo(-1);
+  let statusGood = besogo.makeStatusSimple(STATUS_KO);
+  statusGood.setApproachKo(1);
+  CHECK(statusGood.better(statusBad));
+  CHECK(!statusBad.better(statusGood));
+});
+
+besogo.addTest("Status", "SaveLoadApproachKo", function()
+{
+  let status = besogo.makeStatusSimple(STATUS_KO);
+  status.setApproachKo(-1);
+  CHECK_EQUALS(status.str(), "A-1KO+");
+
+  let statusLoaded = besogo.loadStatusFromString(status.str());
+  CHECK_EQUALS(statusLoaded.str(), "A-1KO+");
+  CHECK_EQUALS(statusLoaded.blackFirst.approaches, -1);
+  CHECK_EQUALS(statusLoaded.blackFirst.extraThreats, 0);
+});
+
+besogo.addTest("Status", "SaveLoadApproachKoWithNegativeExtraThreats", function()
+{
+  let status = besogo.makeStatusSimple(STATUS_KO);
+  status.setApproachKo(-1, -1);
+  CHECK_EQUALS(status.str(), "A-1KO-");
+
+  let statusLoaded = besogo.loadStatusFromString(status.str());
+  CHECK_EQUALS(statusLoaded.str(), "A-1KO-");
+  CHECK_EQUALS(statusLoaded.blackFirst.approaches, -1);
+  CHECK_EQUALS(statusLoaded.blackFirst.extraThreats, -1);
+});
+
 besogo.addTest("Status", "StatusSekiSimple", function()
 {
   let status1 = besogo.makeStatus();

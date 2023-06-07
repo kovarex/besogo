@@ -15,6 +15,7 @@ besogo.makeCommentPanel = function(container, editor)
       deadSelection = null,
       koSelection = null,
       koExtraThreats = null,
+      koApproaches = null,
       sekiSelection = null,
       sekiSente = null,
       aliveSelection = null,
@@ -149,6 +150,31 @@ besogo.makeCommentPanel = function(container, editor)
     noneSelection = createRadioButtonRow(table, 'none', STATUS_NONE);
     deadSelection = createRadioButtonRow(table, 'dead', STATUS_DEAD);
 
+    let koSettingsSpan = document.createElement('span');
+
+    let koApproachesLabel = document.createElement('label');
+    koApproachesLabel.textContent = 'Approaches: ';
+    koSettingsSpan.appendChild(koApproachesLabel);
+
+    koApproaches = document.createElement('input');
+    koApproaches.type = 'text';
+    koApproaches.oninput = function(event)
+    {
+      if (!editor.getCurrent().statusSource)
+        return;
+      if (editor.getCurrent().statusSource.blackFirst.type != STATUS_KO)
+        return;
+      let newStatus = besogo.makeStatusSimple(STATUS_KO);
+      newStatus.setApproachKo(Number(event.target.value), editor.getCurrent().statusSource.blackFirst.extraThreats);
+      editor.getCurrent().setStatusSource(newStatus);
+      updateStatusLabel();
+    }
+    koSettingsSpan.appendChild(koApproaches);
+
+    let koExtraThreatsLabel = document.createElement('label');
+    koExtraThreatsLabel.textContent = 'Threats: ';
+    koSettingsSpan.appendChild(koExtraThreatsLabel);
+
     koExtraThreats = document.createElement('input');
     koExtraThreats.type = 'text';
     koExtraThreats.oninput = function(event)
@@ -158,14 +184,17 @@ besogo.makeCommentPanel = function(container, editor)
       if (editor.getCurrent().statusSource.blackFirst.type != STATUS_KO)
         return;
       editor.getCurrent().setStatusSource(besogo.loadStatusFromString('KO' + event.target.value));
+      newStatus.setApproachKo(koApproaches.value, editor.getCurrent().statusSource.extraThreats);
       updateStatusLabel();
     }
-    koSelection = createRadioButtonRow(table, 'ko', STATUS_KO, koExtraThreats);
+    koSettingsSpan.appendChild(koExtraThreats);
+
+    koSelection = createRadioButtonRow(table, 'ko', STATUS_KO, koSettingsSpan);
 
     let sekiSenteSpan = document.createElement('span');
     sekiSente = createCheckBox(sekiSenteSpan, 'sente', function(event)
     {
-      editor.getCurrent().setStatusSource(besogo.loadStatusFromString('SEKI' + (event.target.value ? '+' : '')));
+      editor.getCurrent().setStatusSource(besogo.loadStatusFromString('SEKI' + (event.target.checked ? '+' : '')));
     });
 
     sekiSelection = createRadioButtonRow(table, 'seki', STATUS_SEKI, sekiSenteSpan);
@@ -183,6 +212,9 @@ besogo.makeCommentPanel = function(container, editor)
     koExtraThreats.disabled = !editable ||
                               !editor.getCurrent().statusSource ||
                               editor.getCurrent().statusSource.blackFirst.type != STATUS_KO;
+    koApproaches.disabled = !editable ||
+                            !editor.getCurrent().statusSource ||
+                            editor.getCurrent().statusSource.blackFirst.type != STATUS_KO;
     sekiSelection.disabled = !editable;
     sekiSente.disabled = !editable ||
                          !editor.getCurrent().statusSource ||
@@ -221,6 +253,7 @@ besogo.makeCommentPanel = function(container, editor)
     {
       koSelection.checked = true;
       koExtraThreats.value = editor.getCurrent().status.blackFirst.getKoStr();
+      koApproaches.value = editor.getCurrent().status.blackFirst.getApproachCount();
       return;
     }
 

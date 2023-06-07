@@ -16,6 +16,7 @@ besogo.makeCommentPanel = function(container, editor)
       koSelection = null,
       koExtraThreats = null,
       sekiSelection = null,
+      sekiSente = null,
       aliveSelection = null,
       goalNoneSelect = null,
       goalKillSelection = null,
@@ -88,12 +89,13 @@ besogo.makeCommentPanel = function(container, editor)
       this.blur(); // No previous focus target, blur instead
   }
 
-  function createRadioButton(target, name, group, onClick)
+  function createInputWithLabel(type, target, name, group, onClick)
   {
     let selection = document.createElement('input');
-    selection.type = "radio";
+    selection.type = type;
     selection.id = name;
-    selection.name = group;
+    if (group)
+      selection.name = group;
     selection.onclick = onClick
     target.appendChild(selection);
 
@@ -103,6 +105,16 @@ besogo.makeCommentPanel = function(container, editor)
     target.appendChild(label);
 
     return selection;
+  }
+
+  function createRadioButton(target, name, group, onClick)
+  {
+    return createInputWithLabel('radio', target, name, group, onClick);
+  }
+
+  function createCheckBox(target, name, onClick)
+  {
+    return createInputWithLabel('checkbox', target, name, null, onClick);
   }
 
   function createRadioButtonRow(table, name, statusType, otherInput = null)
@@ -150,7 +162,13 @@ besogo.makeCommentPanel = function(container, editor)
     }
     koSelection = createRadioButtonRow(table, 'ko', STATUS_KO, koExtraThreats);
 
-    sekiSelection = createRadioButtonRow(table, 'seki', STATUS_SEKI);
+    let sekiSenteSpan = document.createElement('span');
+    sekiSente = createCheckBox(sekiSenteSpan, 'sente', function(event)
+    {
+      editor.getCurrent().setStatusSource(besogo.loadStatusFromString('SEKI' + (event.target.value ? '+' : '')));
+    });
+
+    sekiSelection = createRadioButtonRow(table, 'seki', STATUS_SEKI, sekiSenteSpan);
     aliveSelection = createRadioButtonRow(table, 'alive', STATUS_ALIVE);
 
     return table;
@@ -166,6 +184,9 @@ besogo.makeCommentPanel = function(container, editor)
                               !editor.getCurrent().statusSource ||
                               editor.getCurrent().statusSource.blackFirst.type != STATUS_KO;
     sekiSelection.disabled = !editable;
+    sekiSente.disabled = !editable ||
+                         !editor.getCurrent().statusSource ||
+                          editor.getCurrent().statusSource.blackFirst.type != STATUS_SEKI;
     aliveSelection.disabled = !editable;
   }
 
@@ -206,6 +227,7 @@ besogo.makeCommentPanel = function(container, editor)
     if (editor.getCurrent().status.blackFirst.type == STATUS_SEKI)
     {
       sekiSelection.checked = true;
+      sekiSente.checked = editor.getCurrent().status.blackFirst.sente;
       return;
     }
 

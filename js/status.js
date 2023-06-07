@@ -13,6 +13,8 @@ besogo.makeStatusInternal = function(type)
 {
   var status = [];
   status.type = type;
+  if (type == STATUS_SEKI)
+    status.sente = false;
 
   status.str = function()
   {
@@ -22,7 +24,9 @@ besogo.makeStatusInternal = function(type)
       return result = 'KO' + this.getKoStr();
 
     if (this.type == STATUS_SEKI)
-      return "SEKI";
+    {
+      return "SEKI" + (this.sente ? '+' : '');
+    }
     if (this.type == STATUS_ALIVE)
       return "ALIVE";
   }
@@ -70,12 +74,20 @@ besogo.makeStatusInternal = function(type)
     this.extraThreats = extraThreats;
   }
 
+  status.setSeki = function(sente)
+  {
+    this.type = STATUS_SEKI;
+    this.sente = sente;
+  }
+
   status.better = function(other)
   {
     if (this.type != other.type)
       return this.type < other.type;
     if (this.type == STATUS_KO)
       return this.extraThreats > other.extraThreats;
+    if (this.type == STATUS_SEKI)
+      return this.sente && !other.sente;
     return false;
   }
   return status;
@@ -120,6 +132,12 @@ besogo.loadStatusInternalFromString = function(str)
     return besogo.makeStatusInternal(STATUS_DEAD);
   if (str == "SEKI")
     return besogo.makeStatusInternal(STATUS_SEKI);
+  if (str == "SEKI+")
+  {
+    let status = besogo.makeStatusInternal(STATUS_SEKI);
+    status.setSeki(true);
+    return status;
+  }
   if (str == "ALIVE")
     return besogo.makeStatusInternal(STATUS_ALIVE);
 
@@ -193,6 +211,11 @@ besogo.makeStatus = function(blackFirst = null, whiteFirst = null)
   status.setKo = function(extraThreats)
   {
     this.blackFirst.setKo(extraThreats);
+  }
+
+  status.setSeki = function(sente)
+  {
+    this.blackFirst.setSeki(sente);
   }
 
   return status;

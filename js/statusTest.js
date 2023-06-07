@@ -60,6 +60,41 @@ besogo.addTest("Status", "DeadBetterThanko", function()
   CHECK(!status2.better(status1));
 });
 
+besogo.addTest("Status", "StatusSekiSimple", function()
+{
+  let status1 = besogo.makeStatus();
+  status1.setSeki(false);
+  CHECK_EQUALS(status1.str(), "SEKI");
+
+  let status2 = besogo.makeStatus();
+  status2.setSeki(true);
+  CHECK_EQUALS(status2.str(), "SEKI+");
+
+  CHECK(!status1.better(status2));
+  CHECK(status2.better(status1));
+});
+
+besogo.addTest("Status", "SaveLoadSeki", function()
+{
+  let status = besogo.makeStatusSimple(STATUS_SEKI);
+  let str = status.str();
+  let statusLoaded = besogo.loadStatusFromString(str);
+  CHECK_EQUALS(status.blackFirst.type, STATUS_SEKI);
+  CHECK(!status.blackFirst.sente);
+});
+
+besogo.addTest("Status", "SaveLoadSeki+", function()
+{
+  let status = besogo.makeStatusSimple(STATUS_SEKI);
+  status.setSeki(true);
+  let str = status.str();
+  CHECK(str == 'SEKI+');
+
+  let statusLoaded = besogo.loadStatusFromString(str);
+  CHECK_EQUALS(status.blackFirst.type, STATUS_SEKI);
+  CHECK(status.blackFirst.sente);
+});
+
 besogo.addTest("Status", "InitStatusOnLoadWithoutNone", function()
 {
   let editor = besogo.makeEditor();

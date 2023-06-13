@@ -85,11 +85,20 @@ besogo.makeToolPanel = function(container, editor)
     editor.applyTransformation(transformation);
   });
 
-  makeButtonText('Invert', 'Invert colors', function()
+  makeButtonText('Invert', 'Invert colors of all stones and moves.', function()
   {
     let transformation = besogo.makeTransformation();
     transformation.invertColors = true;
     editor.applyTransformation(transformation);
+  });
+  
+  makeButtonText('Invert firstMove', 'Invert the color of the first move', function()
+  {
+    let transformation = besogo.makeTransformation();
+    transformation.invertColors = true;
+    editor.getRoot().firstMove = transformation.applyOnColor(editor.getRoot().firstMove);
+    editor.notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
+    editor.edited = true;
   });
 
   editor.addListener(toolStateUpdate); // Set up listener for tool state updates

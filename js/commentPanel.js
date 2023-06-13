@@ -215,6 +215,7 @@ besogo.makeCommentPanel = function(container, editor)
     sekiSente = createCheckBox(sekiSenteSpan, 'sente', function(event)
     {
       editor.getCurrent().setStatusSource(besogo.loadStatusFromString('SEKI' + (event.target.checked ? '+' : '')));
+      updateStatusLabel();
     });
 
     sekiSelection = createRadioButtonRow(table, 'seki', STATUS_SEKI, sekiSenteSpan);

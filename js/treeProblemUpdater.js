@@ -104,22 +104,22 @@ besogo.clearCorrectValues = function(node)
 besogo.updateCorrectValues = function(root)
 {
   besogo.clearCorrectValues(root);
-  besogo.updateStatusValuesInternal(root, root.goal);
+  besogo.updateStatusValuesInternal(root, root, root.goal);
   if (root.goal == GOAL_NONE)
-    besogo.updateCorrectValuesInternal(root);
+    besogo.updateCorrectValuesInternal(root, root);
   else
     besogo.updateCorrectValuesBasedOnStatus(root, root.goal, root.status, true /* isCorrectBranch */);
 }
 
-besogo.updateStatusResult = function(blacksMove, child, status, goal)
+besogo.updateStatusResult = function(solversMove, child, status, goal)
 {
-  if (child.status.better(status, goal) == blacksMove)
+  if (child.status.better(status, goal) == solversMove)
     return child.status;
   else
     return status;
 }
 
-besogo.updateStatusValuesInternal = function(node, goal)
+besogo.updateStatusValuesInternal = function(root, node, goal)
 {
   if (node.statusSource)
   {
@@ -131,26 +131,27 @@ besogo.updateStatusValuesInternal = function(node, goal)
     return;
 
   for (let i = 0; i < node.children.length; ++i)
-    besogo.updateStatusValuesInternal(node.children[i], goal);
+    besogo.updateStatusValuesInternal(root, node.children[i], goal);
   for (let i = 0; i < node.virtualChildren.length; ++i)
-    besogo.updateStatusValuesInternal(node.virtualChildren[i].target, goal);
+    besogo.updateStatusValuesInternal(root, node.virtualChildren[i].target, goal);
 
-  if (node.nextIsBlack() == (goal == GOAL_KILL))
+  let solversMove = (node.nextMove() == root.firstMove);
+
+  if (solversMove == (goal == GOAL_KILL))
     node.status = besogo.makeStatusSimple(STATUS_ALIVE_NONE);
   else
     node.status = besogo.makeStatusSimple(STATUS_NONE);
-  var blacksMove = node.nextIsBlack();
 
   for (let i = 0; i < node.children.length; ++i)
-    node.status = besogo.updateStatusResult(blacksMove, node.children[i], node.status, goal);
+    node.status = besogo.updateStatusResult(solversMove, node.children[i], node.status, goal);
   for (let i = 0; i < node.virtualChildren.length; ++i)
-    node.status = besogo.updateStatusResult(blacksMove, node.virtualChildren[i].target, node.status, goal);
+    node.status = besogo.updateStatusResult(solversMove, node.virtualChildren[i].target, node.status, goal);
 
   if (node.status.blackFirst.type == STATUS_ALIVE_NONE)
     node.status = besogo.makeStatusSimple(STATUS_NONE);
 }
 
-besogo.updateCorrectValuesInternal = function(node)
+besogo.updateCorrectValuesInternal = function(root, node)
 {
   if (node.comment.startsWith("+"))
   {
@@ -176,23 +177,18 @@ besogo.updateCorrectValuesInternal = function(node)
   var hasWin = false;
 
   for (let i = 0; i < node.children.length; ++i)
-    if (besogo.updateCorrectValuesInternal(node.children[i]))
+    if (besogo.updateCorrectValuesInternal(root, node.children[i]))
       hasWin = true;
     else
       hasLoss = true;
 
   for (let i = 0; i < node.virtualChildren.length; ++i)
-    if (besogo.updateCorrectValuesInternal(node.virtualChildren[i].target))
+    if (besogo.updateCorrectValuesInternal(root, node.virtualChildren[i].target))
       hasWin = true;
     else
       hasLoss = true;
 
-  // We assume here, that black is player, white is the enemy.
-  // This means, that if black can play a better move to get to a different variation, it is ok.
-  // But if white can play a different move which leads to a variation good for black, white obviously wouldn'tags
-  // choose this move in this situation.
-
-  if (node.nextIsBlack())
+  if (node.nextMove() != root.firstMove)
     node.correct = hasWin;
   else
     node.correct = hasWin && !hasLoss;
@@ -204,11 +200,8 @@ besogo.updateCorrectValuesBasedOnStatus = function(node, goal, parentStatus, isC
 {
   if (node.hasOwnProperty("correct"))
     return;
-
   node.correct = isCorrectBranch && !parentStatus.better(node.status, goal);
 
   for (let i = 0; i < node.children.length; ++i)
     besogo.updateCorrectValuesBasedOnStatus(node.children[i], goal, node.status, node.correct)
-  for (let i = 0; i < node.virtualChildren.length; ++i)
-    besogo.updateCorrectValuesBasedOnStatus(node.virtualChildren[i].target, goal, node.status, node.correct);
 };

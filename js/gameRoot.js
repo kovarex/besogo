@@ -1,10 +1,10 @@
+const BLACK = -1;
+const WHITE = 1;
+const EMPTY = 0;
+
 besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
 {
-  var BLACK = -1, // Stone state constants
-      WHITE = 1, // Equal to -BLACK
-      EMPTY = 0, // Any falsy (e.g., undefined) value is also empty
-
-      root = { // Inherited attributes of root node
+  var root = { // Inherited attributes of root node
           blackCaps: 0,
           whiteCaps: 0,
           moveNumber: 0
@@ -660,6 +660,18 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
 
     for (let i = 0; i < this.children.length; ++i)
       this.children[i].applyTransformation(rootNode, transformation);
+  }
+
+  root.figureFirstToMove = function()
+  {
+    if (this.children.length == 0)
+      return;
+    for (let i = 0; i < this.children.length; ++i)
+      if (this.children[i].move && this.children[i].move.color)
+      {
+        this.firstMove =  this.children[i].move.color
+        return;
+      }
   }
 
   return root;

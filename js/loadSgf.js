@@ -9,6 +9,7 @@ besogo.loadSgf = function(sgf, editor)
   root = besogo.makeGameRoot(size.x, size.y);
 
   loadNodeTree(sgf, root); // Load the rest of game tree
+  root.figureFirstToMove();
   besogo.updateTreeAsProblem(root);
   editor.loadRoot(root); // Load root into the editor
 

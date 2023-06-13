@@ -148,6 +148,7 @@ besogo.makeCommentPanel = function(container, editor)
                                       editor.getCurrent().setStatusSource(besogo.makeStatusSimple(statusType));
                                       updateStatusEditability();
                                       updateStatusLabel();
+                                      editor.notifyListeners({ treeChange: true});
                                    });
     let cell2 = row.insertCell(-1);
     if (otherInput)

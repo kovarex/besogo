@@ -20,6 +20,7 @@ besogo.makeCommentPanel = function(container, editor)
       sekiSelection = null,
       sekiSente = null,
       aliveSelection = null,
+      jumpToBranchWithoutStatusButton = createJumpToBranchWithoutStatusButton(),
       goalKillSelection = null,
       goalLiveSelection = null,
       infoIds =
@@ -74,6 +75,7 @@ besogo.makeCommentPanel = function(container, editor)
   parentDiv.appendChild(createGoalTable());
   parentDiv.appendChild(statusLabel);
   parentDiv.appendChild(statusTable);
+  parentDiv.appendChild(jumpToBranchWithoutStatusButton);
   container.appendChild(makeCommentButton());
   //container.appendChild(gameInfoTable);
   //container.appendChild(gameInfoEdit);
@@ -332,6 +334,7 @@ besogo.makeCommentPanel = function(container, editor)
     }
 
     updateCorrectButton();
+    updateJumpToBranchWithoutStatusButton();
     statusBasedCheckbox.checked = (editor.getCurrent().getRoot().goal != GOAL_NONE);
   }
 
@@ -533,5 +536,30 @@ besogo.makeCommentPanel = function(container, editor)
       correctButton.value = 'Make incorrect';
     else
       correctButton.value = 'Make correct';
+  }
+
+  function createJumpToBranchWithoutStatusButton()
+  {
+    var button = document.createElement('input');
+    button.type = 'button';
+    button.value = 'Jump to branch without status';
+    button.title = 'bla bla';
+    button.addEventListener('focus', preventFocus);
+
+    button.onclick = function()
+    {
+      let leaf = editor.getRoot().getLeafWithoutStatus();
+      if (leaf)
+        editor.setCurrent(leaf);
+    };
+    return button;
+  }
+
+  function updateJumpToBranchWithoutStatusButton()
+  {
+    let current = editor.getCurrent();
+    let count = editor.getRoot().getCountOfLeafsWithoutStatus();
+    jumpToBranchWithoutStatusButton.disabled = editor.getRoot().goal == GOAL_NONE || count == 0;
+    jumpToBranchWithoutStatusButton.value = 'Jump to branch without status (' + count + ')';
   }
 };

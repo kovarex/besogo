@@ -673,6 +673,28 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
         return;
       }
   }
+  root.getCountOfLeafsWithoutStatus = function()
+  {
+    let result = 0;
+    if (!this.hasChildIncludingVirtual() && !this.statusSource)
+      ++result;
+    for (let i = 0; i < this.children.length; ++i)
+      result += this.children[i].getCountOfLeafsWithoutStatus();
+    return result;
+  }
+
+  root.getLeafWithoutStatus = function()
+  {
+    if (!this.hasChildIncludingVirtual() && !this.statusSource)
+      return this;
+    for (let i = 0; i < this.children.length; ++i)
+    {
+      let result = this.children[i].getLeafWithoutStatus();
+      if (result)
+        return result;
+    }
+    return null;
+  }
 
   return root;
 };

@@ -650,10 +650,12 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
     {
       let newMove = transformation.apply(oldMove, {x: sizeX, y: sizeY});
       this.playMoveWithoutMutableCheck(newMove.x, newMove.y, oldMove.color);
+      --this.moveNumber;
     }
       
     for (let i = 0; i < this.children.length; ++i)
       this.children[i].applyTransformation(transformation);
+
   }
 
   return root;

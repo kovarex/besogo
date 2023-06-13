@@ -1,10 +1,10 @@
 // Convert game state tree into SGF string
 besogo.composeSgf = function(editor, expand = false)
 {
-  return '(' + composeNode(editor.getRoot(), expand) + ')';
+  return '(' + composeNode(editor.getRoot(), editor.getRoot(), expand) + ')';
 
   // Recursively composes game node tree
-  function composeNode(tree, expand, moveOverride = null)
+  function composeNode(root, tree, expand, moveOverride = null)
   {
     var string = ';', // Node starts with semi-colon
         children = tree.children,
@@ -13,22 +13,22 @@ besogo.composeSgf = function(editor, expand = false)
     if (!tree.parent) // Null parent means node is root
         // Compose root-specific properties
       string += composeRootProps(tree);
-    string += composeNodeProps(tree, moveOverride); // Compose general properties
+    string += composeNodeProps(root, tree, moveOverride); // Compose general properties
 
     // Recurse composition on child nodes
     if (children.length === 1 && (!expand || tree.virtualChildren.length == 0)) // Continue sequence if only one child
-      string += '\n' + composeNode(children[0], expand);
+      string += '\n' + composeNode(root, children[0], expand);
     else
     {
       for (i = 0; i < children.length; i++)
-        string += '\n(' + composeNode(children[i], expand) + ')';
+        string += '\n(' + composeNode(root, children[i], expand) + ')';
 
       // Don't export alternative virtual white moves when normal moves are available
       // This is mainly because tsumego-hero can't support it
       if (expand && (tree.nextIsBlack() || tree.children.length == 0))
         for (i = 0; i < tree.virtualChildren.length; i++)
           if (tree.correct || !tree.virtualChildren[i].target.correct)
-            string += '\n(' + composeNode(tree.virtualChildren[i].target, expand, tree.virtualChildren[i].move) + ')';
+            string += '\n(' + composeNode(root, tree.virtualChildren[i].target, expand, tree.virtualChildren[i].move) + ')';
     }
     return string;
   }
@@ -61,7 +61,8 @@ besogo.composeSgf = function(editor, expand = false)
   }
 
   // Composes other properties
-  function composeNodeProps(node, moveOverride) {
+  function composeNodeProps(root, node, moveOverride)
+  {
     var string = '',
         props, // Scratch variable for property structures
         stone, i, j; // Scratch iteration variables
@@ -104,10 +105,16 @@ besogo.composeSgf = function(editor, expand = false)
       }
     string += composePointLists(props);
 
-    if (node.comment || node.correctSource) // Compose comment property
+    let correctToSave;
+    if (root.goal == GOAL_NONE)
+      correctToSave = node.correctSource;
+    else
+      correctToSave = !node.hasChildIncludingVirtual() && node.correct;
+
+    if (node.comment || correctToSave) // Compose comment property
     {
       string += (string ? '\n' : ''); // Add line break if other properties exist
-      string += 'C[' + escapeText((node.correctSource ? '+' : '') + node.comment) + ']';
+      string += 'C[' + escapeText((correctToSave ? '+' : '') + node.comment) + ']';
     }
 
     if (node.statusSource)

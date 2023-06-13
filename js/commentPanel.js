@@ -8,6 +8,7 @@ besogo.makeCommentPanel = function(container, editor)
       gameInfoEdit = document.createElement('table'),
       commentBox = document.createElement('div'),
       commentEdit = document.createElement('textarea'),
+      statusBasedCheckbox = null,
       correctButton = makeCorrectVariantButton(),
       playerInfoOrder = 'PW WR WT PB BR BT'.split(' '),
       infoOrder = 'HA KM RU TM OT GN EV PC RO DT RE ON GC AN US SO CP'.split(' '),
@@ -19,7 +20,6 @@ besogo.makeCommentPanel = function(container, editor)
       sekiSelection = null,
       sekiSente = null,
       aliveSelection = null,
-      goalNoneSelect = null,
       goalKillSelection = null,
       goalLiveSelection = null,
       infoIds =
@@ -58,10 +58,20 @@ besogo.makeCommentPanel = function(container, editor)
   let parentDiv = document.createElement('div');
   container.appendChild(parentDiv);
 
-  let correctButtonDiv = document.createElement('div');
-  correctButtonDiv.appendChild(correctButton);
+  let correctButtonSpan = document.createElement('span');
+  statusBasedCheckbox = createCheckBox(correctButtonSpan, 'Correct controlled by status', function(event)
+  {
+    editor.getCurrent().getRoot().setGoal(event.target.checked ? GOAL_KILL : GOAL_NONE);
+    updateGoal();
+    updateCorrectButton();
+    updateStatusEditability();
+    besogo.updateCorrectValues(editor.getCurrent().getRoot());
+    editor.notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
+  });
+  statusBasedCheckbox.type = 'checkbox';
+  correctButtonSpan.appendChild(correctButton);
+  parentDiv.appendChild(correctButtonSpan);
   parentDiv.appendChild(createGoalTable());
-  parentDiv.appendChild(correctButtonDiv);
   parentDiv.appendChild(statusLabel);
   parentDiv.appendChild(statusTable);
   container.appendChild(makeCommentButton());
@@ -214,7 +224,7 @@ besogo.makeCommentPanel = function(container, editor)
 
   function updateStatusEditability()
   {
-    let editable = !editor.getCurrent().hasChildIncludingVirtual();
+    let editable = !editor.getCurrent().hasChildIncludingVirtual() && editor.getRoot().goal != GOAL_NONE;
     setEnabledCarefuly(noneSelection, editable);
     setEnabledCarefuly(deadSelection, editable);
     setEnabledCarefuly(koSelection, editable);
@@ -286,12 +296,10 @@ besogo.makeCommentPanel = function(container, editor)
   function updateGoal()
   {
     let goal = editor.getRoot().goal;
-    if (goal == GOAL_NONE)
-      goalNoneSelect.checked = true;
-    else if (goal == GOAL_KILL)
-      goalKillSelection.checked = true;
-    else if (goal == GOAL_LIVE)
-      goalLiveSelection = true;
+    goalKillSelection.checked = (goal == GOAL_KILL);
+    setEnabledCarefuly(goalKillSelection, goal != GOAL_NONE);
+    goalLiveSelection.checked = (goal == GOAL_LIVE);
+    setEnabledCarefuly(goalLiveSelection, goal != GOAL_NONE);
   }
 
   function update(msg)
@@ -321,6 +329,7 @@ besogo.makeCommentPanel = function(container, editor)
     }
 
     updateCorrectButton();
+    statusBasedCheckbox.checked = (editor.getCurrent().getRoot().goal != GOAL_NONE);
   }
 
   function updateGameInfoTable(gameInfo)
@@ -501,10 +510,6 @@ besogo.makeCommentPanel = function(container, editor)
     cell.appendChild(label);
     cell = row.insertCell(-1);
 
-    goalNoneSelect = createGoalRadioButton(cell, 'undefined', GOAL_NONE);
-    row = table.insertRow(-1);
-    cell = row.insertCell(-1);
-    cell = row.insertCell(-1);
     goalKillSelection = createGoalRadioButton(cell, 'kill', GOAL_KILL);
     row = table.insertRow(-1);
     cell = row.insertCell(-1);
@@ -517,7 +522,9 @@ besogo.makeCommentPanel = function(container, editor)
   function updateCorrectButton()
   {
     let current = editor.getCurrent();
-    correctButton.disabled = current.children.length || current.virtualChildren.length
+    correctButton.disabled = editor.getRoot().goal != GOAL_NONE ||
+                             current.children.length ||
+                             current.virtualChildren.length
     if (current.correct)
       correctButton.value = 'Make incorrect';
     else

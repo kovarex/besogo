@@ -11,7 +11,6 @@ besogo.updateTreeAsProblem = function(root)
     if (root.relevantMoves[i])
       ++test;
   besogo.addVirtualChildren(root, root, false);
-  besogo.clearCorrectValues(root);
   besogo.updateCorrectValues(root);
 };
 
@@ -102,11 +101,14 @@ besogo.clearCorrectValues = function(node)
     besogo.clearCorrectValues(node.children[i]);
 }
 
-besogo.updateCorrectValues = function(node)
+besogo.updateCorrectValues = function(root)
 {
-  besogo.clearCorrectValues(node);
-  besogo.updateCorrectValuesInternal(node);
-  besogo.updateStatusValuesInternal(node);
+  besogo.clearCorrectValues(root);
+  besogo.updateStatusValuesInternal(root);
+  if (root.goal == GOAL_NONE)
+    besogo.updateCorrectValuesInternal(root);
+  else
+    besogo.updateCorrectValuesBasedOnStatus(root, root.status, true /* isCorrectBranch */);
 }
 
 besogo.updateStatusResult = function(blacksMove, child, status)
@@ -196,4 +198,17 @@ besogo.updateCorrectValuesInternal = function(node)
     node.correct = hasWin && !hasLoss;
 
   return node.correct;
+};
+
+besogo.updateCorrectValuesBasedOnStatus = function(node, parentStatus, isCorrectBranch)
+{
+  if (node.hasOwnProperty("correct"))
+    return;
+
+  node.correct = isCorrectBranch && !parentStatus.better(node.status);
+
+  for (let i = 0; i < node.children.length; ++i)
+    besogo.updateCorrectValuesBasedOnStatus(node.children[i], node.status, node.correct)
+  for (let i = 0; i < node.virtualChildren.length; ++i)
+    besogo.updateCorrectValuesBasedOnStatus(node.virtualChildren[i].target, node.status, node.correct);
 };

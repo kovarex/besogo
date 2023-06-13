@@ -11,23 +11,24 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
       };
 
   // Initializes non-inherited attributes
-  function initNode(node, parent) {
-      node.parent = parent;
-      node.board = parent ? Object.create(parent.board) : [];
-      node.children = [];
-      node.virtualChildren = [];
+  function initNode(node, parent)
+  {
+    node.parent = parent;
+    node.board = parent ? Object.create(parent.board) : [];
+    node.children = [];
+    node.virtualChildren = [];
 
-      node.move = null;
-      node.setupStones = [];
-      node.virtualParents = [];
-      node.markup = [];
-      node.comment = ''; // Comment on this node
-      node.hash = 0;
-      node.correctSource = false;
-      node.correct = false;
-      node.cameFrom = null;
-      node.statusSource = null;
-      node.status = null;
+    node.move = null;
+    node.setupStones = [];
+    node.virtualParents = [];
+    node.markup = [];
+    node.comment = ''; // Comment on this node
+    node.hash = 0;
+    node.correctSource = false;
+    node.correct = false;
+    node.cameFrom = null;
+    node.statusSource = null;
+    node.status = null;
   }
   initNode(root, null); // Initialize root node with null parent
   root.relevantMoves = [];
@@ -35,16 +36,20 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   root.goal = GOAL_NONE;
   root.status = besogo.makeStatusSimple(STATUS_NONE);
 
+  root.playMove = function(x, y, color = false, allow = false)
+  {
+    if (!this.isMutable('move'))
+      return false; // Move fails if node is immutable
+    return this.playMoveWithoutMutableCheck(x, y, color, allow);
+  }
+
   // Plays a move, returns true if successful
   // Set allow to truthy to allow overwrite, suicide and ko
-  root.playMove = function(x, y, color = false, allow = false)
+  root.playMoveWithoutMutableCheck = function(x, y, color = false, allow = false)
   {
     var captures = 0, // Number of captures made by this move
         overwrite = false, // Flags whether move overwrites a stone
         prevMove; // Previous move for ko check
-
-    if (!this.isMutable('move'))
-      return false; // Move fails if node is immutable
 
     if (!color) // Falsy color indicates auto-color
       color = this.nextMove();
@@ -186,19 +191,17 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   // Places a setup stone, returns true if successful
   root.placeSetup = function(x, y, color)
   {
-      let prevColor = (this.parent && this.parent.getStone(x, y)) || EMPTY;
+    let prevColor = (this.parent && this.parent.getStone(x, y)) || EMPTY;
 
-      if (x < 1 || y < 1 || x > sizeX || y > sizeY) {
-          return false; // Do not allow out of bounds setup
-      }
-      if (!this.isMutable('setup') || this.getStone(x, y) === color) {
-          // Prevent setup changes in immutable node or quit early if no change
-          return false;
-      }
+    if (x < 1 || y < 1 || x > sizeX || y > sizeY)
+      return false; // Do not allow out of bounds setup
+    if (!this.isMutable('setup') || this.getStone(x, y) === color)
+      // Prevent setup changes in immutable node or quit early if no change
+      return false;
 
-      this.setStone(x, y, color); // Place the setup stone
-      this.setupStones[this.fromXY(x, y) ] = color - prevColor; // Record the necessary change
-      return true;
+    this.setStone(x, y, color); // Place the setup stone
+    this.setupStones[this.fromXY(x, y)] = color - prevColor; // Record the necessary change
+    return true;
   };
 
   // Adds markup, returns true if successful
@@ -218,15 +221,15 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   // Gets the setup stone placed at (x, y), returns false if none
   root.getSetup = function(x, y)
   {
-      if (!this.setupStones[this.fromXY(x, y)]) // No setup stone placed
-        return false;
-      else // Determine net effect of setup stone
-        switch(this.getStone(x, y))
-        {
-          case EMPTY: return 'AE';
-          case BLACK: return 'AB';
-          case WHITE: return 'AW';
-        }
+    if (!this.setupStones[this.fromXY(x, y)]) // No setup stone placed
+      return false;
+    else // Determine net effect of setup stone
+      switch(this.getStone(x, y))
+      {
+        case EMPTY: return 'AE';
+        case BLACK: return 'AB';
+        case WHITE: return 'AW';
+      }
   };
 
   // Gets the markup at (x, y)
@@ -627,6 +630,30 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
     console.assert(this.parent == null);
     this.goal = goal;
     besogo.updateCorrectValues(this);
+  }
+  
+  root.applyTransformation = function(transformation)
+  {
+    let oldSetupStones = this.setupStones;
+    this.setupStones = [];
+    this.board = this.parent ? Object.create(this.parent.board) : [];
+    for (let i = 0; i < oldSetupStones.length; ++i)
+      if (oldSetupStones[i])
+      {
+        let position = this.toXY(i);
+        let newPosition = transformation.apply(position, {x: sizeX, y: sizeY});
+        this.placeSetup(newPosition.x, newPosition.y, oldSetupStones[i]);
+      }
+    let oldMove = this.move;
+    this.move = null;
+    if (oldMove)
+    {
+      let newMove = transformation.apply(oldMove, {x: sizeX, y: sizeY});
+      this.playMoveWithoutMutableCheck(newMove.x, newMove.y, oldMove.color);
+    }
+      
+    for (let i = 0; i < this.children.length; ++i)
+      this.children[i].applyTransformation(transformation);
   }
 
   return root;

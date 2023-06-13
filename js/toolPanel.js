@@ -63,10 +63,20 @@ besogo.makeToolPanel = function(container, editor)
   });
 
   makeButtonText('Raise', 'Raise variation', function() { editor.promote(); });
-
   makeButtonText('Lower', 'Lower variation', function() { editor.demote(); });
-
   makeButtonText('Cut', 'Remove branch', function() { editor.cutCurrent(); });
+  makeButtonText('H Flip', 'Flip horizontally', function()
+  {
+    let transformation = besogo.makeTransformation();
+    transformation.hFlip = true;
+    editor.applyTransformation(transformation);
+  });
+  makeButtonText('V Flip', 'Flip vertically', function()
+  {
+    let transformation = besogo.makeTransformation();
+    transformation.vFlip = true;
+    editor.applyTransformation(transformation);
+  });
 
   editor.addListener(toolStateUpdate); // Set up listener for tool state updates
   toolStateUpdate({ label: editor.getLabel(), tool: editor.getTool() }); // Initialize

@@ -118,6 +118,14 @@ besogo.makeCommentPanel = function(container, editor)
     return createInputWithLabel('checkbox', target, name, null, onClick);
   }
 
+  function setEnabledCarefuly(element, enabled)
+  {
+    if (!enabled)
+      if (document.activeElement == element)
+        document.getElementById("target").focus();
+    element.disabled = !enabled;
+  }
+
   function createRadioButtonRow(table, name, statusType, otherInput = null)
   {
     let row = table.insertRow(-1);
@@ -207,20 +215,23 @@ besogo.makeCommentPanel = function(container, editor)
   function updateStatusEditability()
   {
     let editable = !editor.getCurrent().hasChildIncludingVirtual();
-    noneSelection.disabled = !editable;
-    deadSelection.disabled = !editable;
-    koSelection.disabled = !editable;
-    koExtraThreats.disabled = !editable ||
-                              !editor.getCurrent().statusSource ||
-                              editor.getCurrent().statusSource.blackFirst.type != STATUS_KO;
-    koApproaches.disabled = !editable ||
-                            !editor.getCurrent().statusSource ||
-                            editor.getCurrent().statusSource.blackFirst.type != STATUS_KO;
-    sekiSelection.disabled = !editable;
-    sekiSente.disabled = !editable ||
-                         !editor.getCurrent().statusSource ||
-                          editor.getCurrent().statusSource.blackFirst.type != STATUS_SEKI;
-    aliveSelection.disabled = !editable;
+    setEnabledCarefuly(noneSelection, editable);
+    setEnabledCarefuly(deadSelection, editable);
+    setEnabledCarefuly(koSelection, editable);
+    setEnabledCarefuly(koExtraThreats,
+                       editable &&
+                       editor.getCurrent().statusSource &&
+                       editor.getCurrent().statusSource.blackFirst.type == STATUS_KO);
+    setEnabledCarefuly(koApproaches,
+                       editable &&
+                       editor.getCurrent().statusSource &&
+                       editor.getCurrent().statusSource.blackFirst.type == STATUS_KO);
+    setEnabledCarefuly(sekiSelection, editable);
+    setEnabledCarefuly(sekiSente,
+                       editable &&
+                       editor.getCurrent().statusSource &&
+                       editor.getCurrent().statusSource.blackFirst.type == STATUS_SEKI);
+    setEnabledCarefuly(aliveSelection, editable);
   }
 
   function getStatusText()
@@ -506,11 +517,7 @@ besogo.makeCommentPanel = function(container, editor)
   function updateCorrectButton()
   {
     let current = editor.getCurrent();
-    if (current.children.length || current.virtualChildren.length)
-      correctButton.disabled = true;
-    else
-      correctButton.disabled = false;
-
+    correctButton.disabled = current.children.length || current.virtualChildren.length
     if (current.correct)
       correctButton.value = 'Make incorrect';
     else

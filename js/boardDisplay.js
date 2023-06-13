@@ -46,25 +46,25 @@ besogo.makeBoardDisplay = function(container, editor)
   // Initializes the SVG and draws the board
   function initializeBoard(coord)
   {
-      drawBoard(coord); // Initialize the SVG element and draw the board
+    drawBoard(coord); // Initialize the SVG element and draw the board
 
-      stoneGroup = besogo.svgEl("g");
-      markupGroup = besogo.svgEl("g");
-      nextMoveGroup = besogo.svgEl("g");
+    stoneGroup = besogo.svgEl("g");
+    markupGroup = besogo.svgEl("g");
+    nextMoveGroup = besogo.svgEl("g");
 
-      svg.appendChild(stoneGroup); // Add placeholder group for stone layer
-      svg.appendChild(markupGroup); // Add placeholder group for markup layer
-      svg.appendChild(nextMoveGroup);
+    svg.appendChild(stoneGroup); // Add placeholder group for stone layer
+    svg.appendChild(markupGroup); // Add placeholder group for markup layer
+    svg.appendChild(nextMoveGroup);
 
-      if (!TOUCH_FLAG) {
-          hoverGroup = besogo.svgEl("g");
-          svg.appendChild(hoverGroup);
-      }
+    if (!TOUCH_FLAG) {
+        hoverGroup = besogo.svgEl("g");
+        svg.appendChild(hoverGroup);
+    }
 
-      addEventTargets(); // Add mouse event listener layer
+    addEventTargets(); // Add mouse event listener layer
 
-      if (editor.REAL_STONES) // Generate index for realistic stone images
-        randomizeIndex();
+    if (editor.REAL_STONES) // Generate index for realistic stone images
+      randomizeIndex();
   }
 
   // Callback for board display redraws
@@ -107,46 +107,46 @@ besogo.makeBoardDisplay = function(container, editor)
   // Initializes the SVG element and draws the board
   function drawBoard(coord)
   {
-      var boardWidth,
-          boardHeight,
-          string = ""; // Path string for inner board lines
+    var boardWidth,
+        boardHeight,
+        string = ""; // Path string for inner board lines
 
-      BOARD_MARGIN = (coord === 'none' ? 0 : COORD_MARGIN) + EXTRA_MARGIN;
-      boardWidth = 2*BOARD_MARGIN + sizeX*CELL_SIZE;
-      boardHeight = 2*BOARD_MARGIN + sizeY*CELL_SIZE;
+    BOARD_MARGIN = (coord === 'none' ? 0 : COORD_MARGIN) + EXTRA_MARGIN;
+    boardWidth = 2*BOARD_MARGIN + sizeX*CELL_SIZE;
+    boardHeight = 2*BOARD_MARGIN + sizeY*CELL_SIZE;
 
-      svg = besogo.svgEl("svg", { // Initialize the SVG element
-          width: "100%",
-          height: "100%",
-          viewBox: "0 0 " + boardWidth + " " + boardHeight
-      });
+    svg = besogo.svgEl("svg", { // Initialize the SVG element
+        width: "100%",
+        height: "100%",
+        viewBox: "0 0 " + boardWidth + " " + boardHeight
+    });
 
-      svg.appendChild(besogo.svgEl("rect", { // Fill background color
-          width: boardWidth,
-          height: boardHeight,
-          'class': 'besogo-svg-board'
-      }) );
+    svg.appendChild(besogo.svgEl("rect", { // Fill background color
+        width: boardWidth,
+        height: boardHeight,
+        'class': 'besogo-svg-board'
+    }) );
 
-      svg.appendChild(besogo.svgEl("rect", { // Draw outer square of board
-          width: CELL_SIZE*(sizeX - 1),
-          height: CELL_SIZE*(sizeY - 1),
-          x: svgPos(1),
-          y: svgPos(1),
-          'class': 'besogo-svg-lines'
-      }) );
+    svg.appendChild(besogo.svgEl("rect", { // Draw outer square of board
+        width: CELL_SIZE*(sizeX - 1),
+        height: CELL_SIZE*(sizeY - 1),
+        x: svgPos(1),
+        y: svgPos(1),
+        'class': 'besogo-svg-lines'
+    }) );
 
-      for (let i = 2; i <= (sizeY - 1); i++) // Horizontal inner lines
-        string += "M" + svgPos(1) + "," + svgPos(i) + "h" + CELL_SIZE*(sizeX - 1);
-      for (let i = 2; i <= (sizeX - 1); i++) // Vertical inner lines
-          string += "M" + svgPos(i) + "," + svgPos(1) + "v" + CELL_SIZE*(sizeY - 1);
-      svg.appendChild( besogo.svgEl("path", { // Draw inner lines of board
-          d: string,
-          'class': 'besogo-svg-lines'
-      }) );
+    for (let i = 2; i <= (sizeY - 1); i++) // Horizontal inner lines
+      string += "M" + svgPos(1) + "," + svgPos(i) + "h" + CELL_SIZE*(sizeX - 1);
+    for (let i = 2; i <= (sizeX - 1); i++) // Vertical inner lines
+        string += "M" + svgPos(i) + "," + svgPos(1) + "v" + CELL_SIZE*(sizeY - 1);
+    svg.appendChild( besogo.svgEl("path", { // Draw inner lines of board
+        d: string,
+        'class': 'besogo-svg-lines'
+    }) );
 
-      drawHoshi(); // Draw the hoshi points
-      if (coord !== 'none')
-        drawCoords(coord); // Draw the coordinate labels
+    drawHoshi(); // Draw the hoshi points
+    if (coord !== 'none')
+      drawCoords(coord); // Draw the coordinate labels
   }
 
   // Draws coordinate labels on the board

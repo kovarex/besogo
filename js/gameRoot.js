@@ -35,6 +35,7 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   root.nodeHashTable = besogo.makeNodeHashTable();
   root.goal = GOAL_NONE;
   root.status = besogo.makeStatusSimple(STATUS_NONE);
+  root.firstMove = BLACK;
 
   root.playMove = function(x, y, color = false, allow = false)
   {
@@ -183,7 +184,7 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
     if (this.lastMove) // If a move has been played
       return -this.lastMove; // Then next is opposite of last move
     else
-      return BLACK; // otherwise, black plays first
+      return this.getRoot().firstMove; // otherwise, black plays first
   };
 
   root.nextIsBlack = function() { return this.nextMove() == BLACK; }
@@ -659,7 +660,6 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
 
     for (let i = 0; i < this.children.length; ++i)
       this.children[i].applyTransformation(rootNode, transformation);
-
   }
 
   return root;

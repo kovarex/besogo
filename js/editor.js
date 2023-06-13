@@ -576,6 +576,7 @@ besogo.makeEditor = function(sizeX, sizeY)
   function applyTransformation(transformation)
   {
     root.applyTransformation(root, transformation);
+    root.firstMove = transformation.applyOnColor(root.firstMove);
     notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
     edited = true;
   }

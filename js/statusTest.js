@@ -14,8 +14,12 @@ besogo.addTest("Status", "StatusKoThreatsSimple", function()
   status2.setKo(-1);
   CHECK_EQUALS(status2.str(), "KO-");
 
-  CHECK(status1.better(status2));
-  CHECK(!status2.better(status1));
+  // regarldess of goal, ko takes first is better
+  CHECK(status1.better(status2, GOAL_KILL));
+  CHECK(!status2.better(status1, GOAL_KILL));
+
+  CHECK(status1.better(status2, GOAL_LIVE));
+  CHECK(!status2.better(status1, GOAL_LIVE));
 });
 
 besogo.addTest("Status", "StatusKoThreatsHigher", function()
@@ -56,8 +60,14 @@ besogo.addTest("Status", "DeadBetterThanko", function()
 {
   let status1 = besogo.makeStatusSimple(STATUS_DEAD);
   let status2 = besogo.makeStatusSimple(STATUS_KO);
-  CHECK(status1.better(status2));
-  CHECK(!status2.better(status1));
+
+  // when goal is to kill, dead is better
+  CHECK(status1.better(status2, GOAL_KILL));
+  CHECK(!status2.better(status1, GOAL_KILL));
+
+  // when goal is to live, dead is worse
+  CHECK(!status1.better(status2, GOAL_LIVE));
+  CHECK(status2.better(status1, GOAL_LIVE));
 });
 
 besogo.addTest("Status", "ApproachKoGood", function()

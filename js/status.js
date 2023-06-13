@@ -125,10 +125,10 @@ besogo.makeStatusInternal = function(type)
     this.sente = sente;
   }
 
-  status.better = function(other)
+  status.better = function(other, goal)
   {
     if (this.type != other.type)
-      return this.type < other.type;
+      return goal == GOAL_KILL ? (this.type < other.type) : (this.type > other.type);
     if (this.type == STATUS_KO)
       if (this.approaches != other.approaches)
         return this.approaches > other.approaches;
@@ -265,11 +265,11 @@ besogo.makeStatus = function(blackFirst = null, whiteFirst = null)
     return result;
   }
 
-  status.better = function(other)
+  status.better = function(other, goal = GOAL_KILL)
   {
     if (this.blackFirst.type == STATUS_NONE)
       return false;
-    return this.blackFirst.better(other.blackFirst);
+    return this.blackFirst.better(other.blackFirst, goal);
   }
 
   status.setKo = function(extraThreats)

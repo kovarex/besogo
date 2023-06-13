@@ -626,6 +626,7 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
   {
     console.assert(this.parent == null);
     this.goal = goal;
+    besogo.updateCorrectValues(this);
   }
 
   return root;

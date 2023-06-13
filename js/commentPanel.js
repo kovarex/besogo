@@ -494,6 +494,7 @@ besogo.makeCommentPanel = function(container, editor)
                              function()
                              {
                                editor.getCurrent().getRoot().setGoal(goal);
+                               editor.notifyListeners({ treeChange: true, navChange: true, stoneChange: true });
                              });
   }
 

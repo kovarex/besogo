@@ -188,7 +188,8 @@ besogo.updateCorrectValuesInternal = function(root, node)
     else
       hasLoss = true;
 
-  if (node.nextMove() != root.firstMove)
+  let solversMove = (node.nextMove() == root.firstMove);
+  if (solversMove)
     node.correct = hasWin;
   else
     node.correct = hasWin && !hasLoss;

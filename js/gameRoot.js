@@ -631,9 +631,11 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
     this.goal = goal;
     besogo.updateCorrectValues(this);
   }
-  
-  root.applyTransformation = function(transformation)
+
+  root.applyTransformation = function(rootNode, transformation)
   {
+    rootNode.nodeHashTable.erase(this);
+
     let oldSetupStones = this.setupStones;
     this.setupStones = [];
     this.board = this.parent ? Object.create(this.parent.board) : [];
@@ -642,19 +644,21 @@ besogo.makeGameRoot = function(sizeX = 19, sizeY = 19)
       {
         let position = this.toXY(i);
         let newPosition = transformation.apply(position, {x: sizeX, y: sizeY});
-        this.placeSetup(newPosition.x, newPosition.y, oldSetupStones[i]);
+        this.placeSetup(newPosition.x, newPosition.y, transformation.applyOnColor(oldSetupStones[i]));
       }
     let oldMove = this.move;
     this.move = null;
     if (oldMove)
     {
       let newMove = transformation.apply(oldMove, {x: sizeX, y: sizeY});
-      this.playMoveWithoutMutableCheck(newMove.x, newMove.y, oldMove.color);
+      this.playMoveWithoutMutableCheck(newMove.x, newMove.y, transformation.applyOnColor(oldMove.color));
       --this.moveNumber;
     }
-      
+    this.updateHash();
+    rootNode.nodeHashTable.push(this);
+
     for (let i = 0; i < this.children.length; ++i)
-      this.children[i].applyTransformation(transformation);
+      this.children[i].applyTransformation(rootNode, transformation);
 
   }
 

@@ -85,6 +85,13 @@ besogo.makeToolPanel = function(container, editor)
     editor.applyTransformation(transformation);
   });
 
+  makeButtonText('Invert', 'Invert colors', function()
+  {
+    let transformation = besogo.makeTransformation();
+    transformation.invertColors = true;
+    editor.applyTransformation(transformation);
+  });
+
   editor.addListener(toolStateUpdate); // Set up listener for tool state updates
   toolStateUpdate({ label: editor.getLabel(), tool: editor.getTool() }); // Initialize
 

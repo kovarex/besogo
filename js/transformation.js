@@ -1,11 +1,12 @@
 besogo.makeTransformation = function()
 {
   var transformation = [];
-  
+
   transformation.hFlip = false;
   transformation.vFlip = false;
   transformation.rotate = false;
-  
+  transformation.invertColors = false;
+
   transformation.apply = function(position, size)
   {
     let result = [];
@@ -20,6 +21,13 @@ besogo.makeTransformation = function()
       [result.x, result.y] = [size.x - result.y + 1, result.x];
     }
     return result;
+  }
+
+  transformation.applyOnColor = function(color)
+  {
+    if (this.invertColors)
+      return -color;
+    return color;
   }
 
   return transformation;

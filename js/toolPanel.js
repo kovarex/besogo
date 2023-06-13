@@ -78,6 +78,13 @@ besogo.makeToolPanel = function(container, editor)
     editor.applyTransformation(transformation);
   });
 
+  makeButtonText('Rotate', 'Rotate the board clockwise', function()
+  {
+    let transformation = besogo.makeTransformation();
+    transformation.rotate = true;
+    editor.applyTransformation(transformation);
+  });
+
   editor.addListener(toolStateUpdate); // Set up listener for tool state updates
   toolStateUpdate({ label: editor.getLabel(), tool: editor.getTool() }); // Initialize
 

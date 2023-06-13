@@ -4,6 +4,7 @@ besogo.makeTransformation = function()
   
   transformation.hFlip = false;
   transformation.vFlip = false;
+  transformation.rotate = false;
   
   transformation.apply = function(position, size)
   {
@@ -14,6 +15,10 @@ besogo.makeTransformation = function()
       result.x = size.x - position.x + 1;
     if (this.vFlip)
       result.y = size.y - position.y + 1;
+    if (this.rotate)
+    {
+      [result.x, result.y] = [size.x - result.y + 1, result.x];
+    }
     return result;
   }
 
